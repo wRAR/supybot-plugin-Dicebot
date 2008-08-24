@@ -45,8 +45,8 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
-    rollReMultiple = re.compile(r'(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
+    rollReStandard = re.compile(r'\b(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
+    rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
