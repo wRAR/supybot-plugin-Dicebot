@@ -68,8 +68,8 @@ class Dicebot(callbacks.Plugin):
     def roll(self, irc, msg, args, m):
         """<dice>d<sides>[<modifier>]
 
-	Rolls a dice with <sides> number of sides <dice> times, summarizes the
-	results and adds optional modifier <modifier>
+        Rolls a dice with <sides> number of sides <dice> times, summarizes the
+        results and adds optional modifier <modifier>
         For example, 2d6 will roll 2 six-sided dices; 10d10-3 will roll 10
         ten-sided dices and substract 3 from the total result.
         """
@@ -93,18 +93,18 @@ class Dicebot(callbacks.Plugin):
         dice = int(m.group('dice'))
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-	if dice > 1000 or sides > 100 or sides < 2:
-	    return
-	res = self._roll(dice, sides, mod)
-	return self._formatSingleResult(res, dice, sides, mod)
+        if dice > 1000 or sides > 100 or sides < 2:
+            return
+        res = self._roll(dice, sides, mod)
+        return self._formatSingleResult(res, dice, sides, mod)
         
     def _parseMultipleRoll(self, m):
         rolls = int(m.group('rolls') or 0)
         dice = int(m.group('dice'))
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-	if dice > 1000 or sides > 100 or sides < 2 or rolls < 1 or rolls > 30:
-	    return
+        if dice > 1000 or sides > 100 or sides < 2 or rolls < 1 or rolls > 30:
+            return
         L = [0] * rolls
         for i in xrange(rolls):
             L[i] = self._roll(dice, sides, mod)
@@ -126,12 +126,12 @@ class Dicebot(callbacks.Plugin):
 
         m = re.search(self.rollReMultiple, text)
         if m:
-	    irc.reply(self._parseMultipleRoll(m))
+            irc.reply(self._parseMultipleRoll(m))
             return
 
         m = re.search(self.rollReStandard, text)
-	if m:
-	    irc.reply(self._parseStandardRoll(m))
+        if m:
+            irc.reply(self._parseStandardRoll(m))
             return
 
 Class = Dicebot
