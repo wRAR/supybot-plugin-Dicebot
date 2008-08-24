@@ -39,7 +39,7 @@ import supybot.callbacks as callbacks
 from supybot.utils.iter import all
 
 class Dicebot(callbacks.Plugin):
-    """This plugin supports rolling the dices using !roll 4d20+3 as well as
+    """This plugin supports rolling the dice using !roll 4d20+3 as well as
     automatically rolling such combinations it sees in the channel (if
     autoRoll option is enabled for that channel) or query (if
     autoRollInPrivate option is enabled).
@@ -48,7 +48,7 @@ class Dicebot(callbacks.Plugin):
     rollReStandard = re.compile(r'(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
     rollReMultiple = re.compile(r'(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
 
-    MAX_DICES = 1000
+    MAX_DICE = 1000
     MIN_SIDES = 2
     MAX_SIDES = 100
     MAX_ROLLS = 30
@@ -74,14 +74,14 @@ class Dicebot(callbacks.Plugin):
     def roll(self, irc, msg, args, m):
         """<dice>d<sides>[<modifier>]
 
-        Rolls a dice with <sides> number of sides <dice> times, summarizes the
+        Rolls a die with <sides> number of sides <dice> times, summarizes the
         results and adds optional modifier <modifier>
-        For example, 2d6 will roll 2 six-sided dices; 10d10-3 will roll 10
-        ten-sided dices and substract 3 from the total result.
+        For example, 2d6 will roll 2 six-sided dice; 10d10-3 will roll 10
+        ten-sided dice and substract 3 from the total result.
         """
         (dice, sides, mod) = utils.iter.imap(lambda x: int(x or 0), m.groups())
-        if dice > self.MAX_DICES:
-            irc.error('You can\'t roll more than %d dice.' % self.MAX_DICES)
+        if dice > self.MAX_DICE:
+            irc.error('You can\'t roll more than %d dice.' % self.MAX_DICE)
         elif sides > self.MAX_SIDES:
             irc.error('Dice can\'t have more than %d sides.' % self.MAX_SIDES)
         elif sides < self.MIN_SIDES:
@@ -98,7 +98,7 @@ class Dicebot(callbacks.Plugin):
         dice = int(m.group('dice'))
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-        if dice > self.MAX_DICES or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
+        if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
             return
         res = self._roll(dice, sides, mod)
         return self._formatSingleResult(res, dice, sides, mod)
@@ -108,7 +108,7 @@ class Dicebot(callbacks.Plugin):
         dice = int(m.group('dice'))
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-        if dice > self.MAX_DICES or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
+        if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
             return
         L = [''] * rolls
         for i in xrange(rolls):

@@ -42,9 +42,9 @@ def configure(advanced):
 Dicebot = conf.registerPlugin('Dicebot')
 conf.registerChannelValue(Dicebot, 'autoRoll',
     registry.Boolean(False, """Determines whether the bot will automatically
-    roll the dices it sees in the channel."""))
+    roll the dice it sees in the channel."""))
 conf.registerGlobalValue(Dicebot, 'autoRollInPrivate',
     registry.Boolean(False, """Determines whether the bot will automatically
-    roll the dices it sees in private messages."""))
+    roll the dice it sees in private messages."""))
 
 # vim:set shiftwidth=4 tabstop=8 expandtab textwidth=78
