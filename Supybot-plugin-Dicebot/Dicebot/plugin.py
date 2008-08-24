@@ -67,30 +67,18 @@ class Dicebot(callbacks.Plugin):
         else:
             return ''
 
-    def _autoRollEnabled(self, irc, channel):
-        return ((irc.isChannel(channel) and
-                self.registryValue('autoRoll', channel)) or
-                (not irc.isChannel(channel) and
-                self.registryValue('autoRollInPrivate')))
+    def _tryAutoRoll(self, irc, text, expr, parser):
+        m = expr.search(text)
+        if m:
+            reply = parser(m)
+            if reply:
+                irc.reply(reply)
+                return True
+        return False
 
     def _process(self, irc, text):
         self._tryAutoRoll(irc, text, self.rollReMultiple, self._parseMultipleRoll) or \
             self._tryAutoRoll(irc, text, self.rollReStandard, self._parseStandardRoll)
-
-    def roll(self, irc, msg, args, text):
-        """<dice>d<sides>[<modifier>]
-
-        Rolls a die with <sides> number of sides <dice> times, summarizes the
-        results and adds optional modifier <modifier>
-        For example, 2d6 will roll 2 six-sided dice; 10d10-3 will roll 10
-        ten-sided dice and substract 3 from the total result.
-        """
-        if self._autoRollEnabled(irc, msg.args[0]):
-            return
-        self._process(irc, text)
-
-    roll = wrap(roll, ['somethingWithoutSpaces'])
-
 
     def _parseStandardRoll(self, m):
         dice = int(m.group('dice') or 1)
@@ -113,24 +101,32 @@ class Dicebot(callbacks.Plugin):
             L[i] = str(self._roll(dice, sides, mod))
         return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + ', '.join(L)
 
-    def _tryAutoRoll(self, irc, text, expr, parser):
-        m = expr.search(text)
-        if m:
-            reply = parser(m)
-            if reply:
-                irc.reply(reply)
-                return True
-        return False
+    def _autoRollEnabled(self, irc, channel):
+        return ((irc.isChannel(channel) and
+                self.registryValue('autoRoll', channel)) or
+                (not irc.isChannel(channel) and
+                self.registryValue('autoRollInPrivate')))
+
+    def roll(self, irc, msg, args, text):
+        """<dice>d<sides>[<modifier>]
+
+        Rolls a die with <sides> number of sides <dice> times, summarizes the
+        results and adds optional modifier <modifier>
+        For example, 2d6 will roll 2 six-sided dice; 10d10-3 will roll 10
+        ten-sided dice and substract 3 from the total result.
+        """
+        if self._autoRollEnabled(irc, msg.args[0]):
+            return
+        self._process(irc, text)
+    roll = wrap(roll, ['somethingWithoutSpaces'])
 
     def doPrivmsg(self, irc, msg):
         if not self._autoRollEnabled(irc, msg.args[0]):
             return
-
         if ircmsgs.isAction(msg):
             text = ircmsgs.unAction(msg)
         else:
             text = msg.args[1]
-
         self._process(irc, text)
 
 Class = Dicebot
