@@ -70,6 +70,11 @@ class Dicebot(callbacks.Plugin):
         else:
             return ''
 
+    def _autoRollEnabled(self, irc, channel):
+        return ((irc.isChannel(channel) and
+                self.registryValue('autoRoll', channel)) or
+                (not irc.isChannel(channel) and
+                self.registryValue('autoRollInPrivate')))
 
     def roll(self, irc, msg, args, m):
         """<dice>d<sides>[<modifier>]
@@ -79,6 +84,9 @@ class Dicebot(callbacks.Plugin):
         For example, 2d6 will roll 2 six-sided dice; 10d10-3 will roll 10
         ten-sided dice and substract 3 from the total result.
         """
+        if self._autoRollEnabled(irc, msg.args[0]):
+            return
+
         (dice, sides, mod) = utils.iter.imap(lambda x: int(x or 0), m.groups())
         if dice > self.MAX_DICE:
             irc.error('You can\'t roll more than %d dice.' % self.MAX_DICE)
@@ -126,10 +134,7 @@ class Dicebot(callbacks.Plugin):
         return False
 
     def doPrivmsg(self, irc, msg):
-        channel = msg.args[0]
-        if (irc.isChannel(channel) and not self.registryValue('autoRoll', channel)):
-            return
-        if (not irc.isChannel(channel) and not self.registryValue('autoRollInPrivate')):
+        if not self._autoRollEnabled(irc, msg.args[0]):
             return
 
         if ircmsgs.isAction(msg):
