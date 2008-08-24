@@ -114,9 +114,11 @@ class Dicebot(callbacks.Plugin):
 
     def doPrivmsg(self, irc, msg):
         channel = msg.args[0]
-        if not irc.isChannel(channel) or not self.registryValue('autoRoll', channel):
-	    return
-		    
+        if (irc.isChannel(channel) and not self.registryValue('autoRoll', channel)):
+            return
+        if (not irc.isChannel(channel) and not self.registryValue('autoRollInPrivate')):
+            return
+
         if ircmsgs.isAction(msg):
             text = ircmsgs.unAction(msg)
         else:
