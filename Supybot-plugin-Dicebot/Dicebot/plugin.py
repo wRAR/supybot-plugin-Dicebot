@@ -48,6 +48,11 @@ class Dicebot(callbacks.Plugin):
     rollReStandard = re.compile(r'(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
     rollReMultiple = re.compile(r'(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
 
+    MAX_DICES = 1000
+    MIN_SIDES = 2
+    MAX_SIDES = 100
+    MAX_ROLLS = 30
+
     def _roll(self, dice, sides, mod):
         res = int(mod)
         for i in xrange(dice):
@@ -75,16 +80,15 @@ class Dicebot(callbacks.Plugin):
         ten-sided dices and substract 3 from the total result.
         """
         (dice, sides, mod) = utils.iter.imap(lambda x: int(x or 0), m.groups())
-        if dice > 1000:
-            irc.error('You can\'t roll more than 1000 dice.')
-        elif sides > 100:
-            irc.error('Dice can\'t have more than 100 sides.')
-        elif sides < 2:
-            irc.error('Dice can\'t have fewer than 2 sides.')
+        if dice > self.MAX_DICES:
+            irc.error('You can\'t roll more than %d dice.' % self.MAX_DICES)
+        elif sides > self.MAX_SIDES:
+            irc.error('Dice can\'t have more than %d sides.' % self.MAX_SIDES)
+        elif sides < self.MIN_SIDES:
+            irc.error('Dice can\'t have fewer than %d sides.' % self.MIN_SIDES)
         else:
             res = self._roll(dice, sides, mod)
-
-        irc.reply(self._formatSingleResult(res, dice, sides, mod))
+            irc.reply(self._formatSingleResult(res, dice, sides, mod))
 
     roll = wrap(roll, [rest(('matches', rollReStandard,
                         'Dice must be of the form <dice>d<sides><modifier>'))])
@@ -94,7 +98,7 @@ class Dicebot(callbacks.Plugin):
         dice = int(m.group('dice'))
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-        if dice > 1000 or sides > 100 or sides < 2:
+        if dice > self.MAX_DICES or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
             return
         res = self._roll(dice, sides, mod)
         return self._formatSingleResult(res, dice, sides, mod)
@@ -104,14 +108,22 @@ class Dicebot(callbacks.Plugin):
         dice = int(m.group('dice'))
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-        if dice > 1000 or sides > 100 or sides < 2 or rolls < 1 or rolls > 30:
+        if dice > self.MAX_DICES or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
             return
         L = [''] * rolls
         for i in xrange(rolls):
             L[i] = str(self._roll(dice, sides, mod))
         
         return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + ', '.join(L)
-        
+
+    def _tryAutoRoll(self, irc, text, expr, parser):
+        m = expr.search(text)
+        if m:
+            reply = parser(m)
+            if reply:
+                irc.reply(reply)
+                return True
+        return False
 
     def doPrivmsg(self, irc, msg):
         channel = msg.args[0]
@@ -125,15 +137,8 @@ class Dicebot(callbacks.Plugin):
         else:
             text = msg.args[1]
 
-        m = re.search(self.rollReMultiple, text)
-        if m:
-            irc.reply(self._parseMultipleRoll(m))
-            return
-
-        m = re.search(self.rollReStandard, text)
-        if m:
-            irc.reply(self._parseStandardRoll(m))
-            return
+        self._tryAutoRoll(irc, text, self.rollReMultiple, self._parseMultipleRoll) or \
+            self._tryAutoRoll(irc, text, self.rollReStandard, self._parseStandardRoll)
 
 Class = Dicebot
 
