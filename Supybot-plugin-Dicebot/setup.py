@@ -30,8 +30,23 @@ version = '0.2'
 setup(
     name='supybot-plugin-dicebot',
     version=version,
+    author='Andrey Rahmatullin',
+    author_email='wrar@altlinux.ru',
+    url='http://git.altlinux.org/people/wrar/packages/?p=Supybot-plugin-Dicebot.git',
+    description='Dicebot plugin for Supybot',
     packages=packages,
     package_dir=package_dir,
+    classifiers = [
+        'Development Status :: 3 - Alpha',
+        'Environment :: Plugins',
+        'Intended Audience :: End Users/Desktop',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Communications :: Chat :: Internet Relay Chat',
+        'Topic :: Games/Entertainment :: Board Games',
+        ]
     )
 
 
