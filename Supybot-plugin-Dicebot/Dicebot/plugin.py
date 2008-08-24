@@ -105,11 +105,11 @@ class Dicebot(callbacks.Plugin):
         mod = int(m.group('mod') or 0)
         if dice > 1000 or sides > 100 or sides < 2 or rolls < 1 or rolls > 30:
             return
-        L = [0] * rolls
+        L = [''] * rolls
         for i in xrange(rolls):
-            L[i] = self._roll(dice, sides, mod)
+            L[i] = str(self._roll(dice, sides, mod))
         
-        return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + format('%L', [str(x) for x in L])
+        return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + ', '.join(L)
         
 
     def doPrivmsg(self, irc, msg):
