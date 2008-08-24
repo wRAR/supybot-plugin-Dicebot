@@ -45,8 +45,8 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'\b(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
-    rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
+    rollReStandard = re.compile(r'\b(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
+    rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -103,7 +103,7 @@ class Dicebot(callbacks.Plugin):
 
 
     def _parseStandardRoll(self, m):
-        dice = int(m.group('dice'))
+        dice = int(m.group('dice') or 1)
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
         if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
@@ -113,7 +113,7 @@ class Dicebot(callbacks.Plugin):
         
     def _parseMultipleRoll(self, m):
         rolls = int(m.group('rolls') or 0)
-        dice = int(m.group('dice'))
+        dice = int(m.group('dice') or 1)
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
         if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
