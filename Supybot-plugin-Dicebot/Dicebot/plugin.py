@@ -40,8 +40,9 @@ from supybot.utils.iter import all
 
 class Dicebot(callbacks.Plugin):
     """This plugin supports rolling the dices using !roll 4d20+3 as well as
-    automatically rolling such combinations it sees in the channel, if
-    autoRoll option is enabled for that channel.
+    automatically rolling such combinations it sees in the channel (if
+    autoRoll option is enabled for that channel) or query (if
+    autoRollInPrivate option is enabled).
     """
 
     rollReStandard = re.compile(r'(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
