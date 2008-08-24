@@ -44,8 +44,8 @@ class Dicebot(callbacks.Plugin):
     autoRoll option is enabled for that channel.
     """
 
-    rollReStandard = re.compile(r'(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>\s*[+-]\s*\d+)?')
-    rollReMultiple = re.compile(r'(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>\s*[+-]\s*\d+)?')
+    rollReStandard = re.compile(r'(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
+    rollReMultiple = re.compile(r'(?P<rolls>\d+)#(?P<dice>\d+)d(?P<sides>\d+)(?P<mod>[+-]\d+)?')
 
     def _roll(self, dice, sides, mod):
         res = int(mod)
