@@ -68,13 +68,13 @@ class Dicebot(callbacks.Plugin):
             return ''
 
     def _tryAutoRoll(self, irc, text, expr, parser):
-        m = expr.search(text)
-        if m:
+        success = False
+        for m in expr.finditer(text):
             reply = parser(m)
             if reply:
                 irc.reply(reply)
-                return True
-        return False
+                success = True
+        return success
 
     def _process(self, irc, text):
         self._tryAutoRoll(irc, text, self.rollReMultiple, self._parseMultipleRoll) or \
