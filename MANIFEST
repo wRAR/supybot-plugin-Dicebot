@@ -1,0 +1,6 @@
+setup.py
+Dicebot/__init__.py
+Dicebot/config.py
+Dicebot/plugin.py
+Dicebot/test.py
+Dicebot/README.txt
