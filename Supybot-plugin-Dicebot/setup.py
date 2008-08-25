@@ -22,9 +22,11 @@ pluginFiles = glob.glob(os.path.join('.', '*.py'))
 packages =  ['supybot.plugins.' + s for s in plugins]
 
 package_dir = { }
+package_data = { }
 
 for plugin in plugins:
     package_dir['supybot.plugins.' + plugin] = plugin
+    package_data['supybot.plugins.' + plugin] = ['README.txt']
 
 version = '0.2'
 setup(
@@ -36,6 +38,7 @@ setup(
     description='Dicebot plugin for Supybot',
     packages=packages,
     package_dir=package_dir,
+    package_data=package_data,
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Environment :: Plugins',
@@ -46,7 +49,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Communications :: Chat :: Internet Relay Chat',
         'Topic :: Games/Entertainment :: Board Games',
-        ]
+        ],
     )
 
 
