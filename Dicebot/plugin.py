@@ -67,18 +67,22 @@ class Dicebot(callbacks.Plugin):
         else:
             return ''
 
-    def _tryAutoRoll(self, irc, text, expr, parser):
-        success = False
-        for m in expr.finditer(text):
-            reply = parser(m)
-            if reply:
-                irc.reply(reply)
-                success = True
-        return success
-
     def _process(self, irc, text):
-        self._tryAutoRoll(irc, text, self.rollReMultiple, self._parseMultipleRoll) or \
-            self._tryAutoRoll(irc, text, self.rollReStandard, self._parseStandardRoll)
+        checklist = [
+                (self.rollReMultiple, self._parseMultipleRoll),
+                (self.rollReStandard, self._parseStandardRoll),
+                ]
+        results = [ ]
+        for word in text.split():
+            for expr, parser in checklist:
+                m = expr.search(word)
+                if m:
+                    r = parser(m)
+                    if r:
+                        results.append(r)
+                        break
+        if results:
+            irc.reply('; '.join(results))
 
     def _parseStandardRoll(self, m):
         dice = int(m.group('dice') or 1)
