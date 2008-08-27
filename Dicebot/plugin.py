@@ -95,7 +95,7 @@ class Dicebot(callbacks.Plugin):
         if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
             return
         res = self._roll(dice, sides, mod)
-        return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + str(res)
+        return '[%dd%d%s] %d' % (dice, sides, self._formatMod(mod), res)
         
     def _parseMultipleRoll(self, m):
         rolls = int(m.group('rolls') or 0)
@@ -104,18 +104,14 @@ class Dicebot(callbacks.Plugin):
         mod = int(m.group('mod') or 0)
         if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
             return
-        L = [''] * rolls
-        for i in xrange(rolls):
-            L[i] = str(self._roll(dice, sides, mod))
-        return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + ', '.join(L)
+        L = [str(self._roll(dice, sides, mod)) for i in xrange(rolls)]
+        return '[%dd%d%s] %s' % (dice, sides, self._formatMod(mod), ', '.join(L))
 
     def _parseShadowrunRoll(self, m):
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
-        L = [0] * rolls
-        for i in xrange(rolls):
-            L[i] = self._roll(1, 6)
+        L = [self._roll(1, 6) for i in xrange(rolls)]
         self.log.debug(format("%L", [str(i) for i in L]))
         return self._processSRResults(L, rolls)
 
@@ -123,9 +119,7 @@ class Dicebot(callbacks.Plugin):
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
-        L = [0] * rolls
-        for i in xrange(rolls):
-            L[i] = self._roll(1, 6)
+        L = [self._roll(1, 6) for i in xrange(rolls)]
         self.log.debug(format("%L", [str(i) for i in L]))
         reroll = L.count(6)
         while reroll:
