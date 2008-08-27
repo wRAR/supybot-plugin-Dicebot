@@ -47,13 +47,15 @@ class Dicebot(callbacks.Plugin):
 
     rollReStandard = re.compile(r'\b(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
     rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
+    rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
+    rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
     MAX_SIDES = 100
     MAX_ROLLS = 30
 
-    def _roll(self, dice, sides, mod):
+    def _roll(self, dice, sides, mod=0):
         res = int(mod)
         for i in xrange(dice):
             res += random.randrange(1, sides+1)
@@ -71,6 +73,8 @@ class Dicebot(callbacks.Plugin):
         checklist = [
                 (self.rollReMultiple, self._parseMultipleRoll),
                 (self.rollReStandard, self._parseStandardRoll),
+                (self.rollReSR, self._parseShadowrunRoll),
+                (self.rollReSRX, self._parseShadowrunXRoll),
                 ]
         results = [ ]
         for word in text.split():
@@ -104,6 +108,46 @@ class Dicebot(callbacks.Plugin):
         for i in xrange(rolls):
             L[i] = str(self._roll(dice, sides, mod))
         return '[' + str(dice) + 'd' + str(sides) + self._formatMod(mod) + '] ' + ', '.join(L)
+
+    def _parseShadowrunRoll(self, m):
+        rolls = int(m.group('rolls'))
+        if rolls < 1 or rolls > self.MAX_ROLLS:
+            return
+        L = [0] * rolls
+        for i in xrange(rolls):
+            L[i] = self._roll(1, 6)
+        self.log.debug(format("%L", [str(i) for i in L]))
+        return self._processSRResults(L, rolls)
+
+    def _parseShadowrunXRoll(self, m):
+        rolls = int(m.group('rolls'))
+        if rolls < 1 or rolls > self.MAX_ROLLS:
+            return
+        L = [0] * rolls
+        for i in xrange(rolls):
+            L[i] = self._roll(1, 6)
+        self.log.debug(format("%L", [str(i) for i in L]))
+        reroll = L.count(6)
+        while reroll:
+            rerolled = [self._roll(1, 6) for i in xrange(reroll)]
+            self.log.debug(format("%L", [str(i) for i in rerolled]))
+            L.extend([r for r in rerolled if r >= 5])
+            reroll = rerolled.count(6)
+        return self._processSRResults(L, rolls, True)
+
+    def _processSRResults(self, results, pool, isExploding=False):
+        hits = results.count(6) + results.count(5)
+        ones = results.count(1)
+        isHit = hits > 0
+        isGlitch = ones >= (pool + 1) / 2
+        explStr = ', exploding' if isExploding else ''
+        if isHit:
+            hitsStr = 'hits' if hits > 1 else 'hit'
+            glitchStr = ', glitch' if isGlitch else ''
+            return '(pool %d%s) %d %s%s' % (pool, explStr, hits, hitsStr, glitchStr)
+        if isGlitch:
+            return '(pool %d%s) critical glitch!' % (pool, explStr)
+        return '(pool %d%s) 0 hits' % (pool, explStr)
 
     def _autoRollEnabled(self, irc, channel):
         return ((irc.isChannel(channel) and
