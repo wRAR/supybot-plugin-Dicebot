@@ -10,6 +10,11 @@ if sys.version_info < (2, 3, 0):
     sys.stderr.write("Supybot requires Python 2.3 or newer.\n")
     sys.exit(-1)
 
+if sys.version_info < (2, 5, 0):
+    sys.stderr.write("Dicebot requires Python 2.5 or newer. You can backport"
+            "it to 2.3 if you need that.\n")
+    sys.exit(-1)
+
 import glob
 import shutil
 import os.path
