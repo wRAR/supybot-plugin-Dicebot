@@ -30,6 +30,12 @@ query). Autorolling is much more convenient during online play, but may be
 confusing during normal talk, so it can be enabled only when it is needed.
 6. To distinguish between different rolls, all results are prefixed with
 requesting user's nick and requested expression.
+7. If you use several expressions in one message, bot will roll all of them and
+return all the results in one reply, separated with semicolon.
+8. Shadowrun 4ed support, see included Shadowrun.txt.
+9. Concerning extensibility, you just need to add a regex for your expression
+and a function which parses that expression and returns a string which will be
+displayed.
 
 Configuration
 ~~~~~~~~~~~~~
@@ -39,12 +45,8 @@ Both settings are off by default, so that bot replies only to explicit !roll.
 
 To be done
 ~~~~~~~~~~
-Rolling of several expressions from one message (displaying results separately,
-but in one reply).
 Calculating more advanced expressions: including several dice ('1d12+2d6+4'),
 including several modifiers ('1d20+10-3').
-Special support for Shadowrun mechanics (more compact expression forms,
-calculating hits, recognizing glithes, exploding dice mode).
 
 Thanks
 ~~~~~~
