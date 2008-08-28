@@ -1,0 +1,3 @@
+include setup.py
+include Dicebot/*.py
+include docs/*.txt

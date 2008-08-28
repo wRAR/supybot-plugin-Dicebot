@@ -17,8 +17,6 @@ import os.path
 from distutils.core import setup
 from distutils.sysconfig import get_python_lib
 
-pluginFiles = glob.glob(os.path.join('.', '*.py'))
-
 packages =  ['supybot.plugins.' + s for s in plugins]
 
 package_dir = { }
@@ -26,7 +24,7 @@ package_data = { }
 
 for plugin in plugins:
     package_dir['supybot.plugins.' + plugin] = plugin
-    package_data['supybot.plugins.' + plugin] = ['README.txt']
+    package_data['supybot.plugins.' + plugin] = ['docs/*.txt']
 
 version = '0.2'
 setup(
