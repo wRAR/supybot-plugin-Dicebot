@@ -1,0 +1,9 @@
+0.3
+~~~
+- Shadowrun 4 support added (see Shadowrun.txt).
+- Multiple expressions per message are now supported.
+
+0.2
+~~~
+- First public release.
+
