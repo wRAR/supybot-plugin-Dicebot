@@ -15,12 +15,8 @@ if sys.version_info < (2, 5, 0):
             "it to 2.3 if you need that.\n")
     sys.exit(-1)
 
-import glob
-import shutil
 import os.path
-
 from distutils.core import setup
-from distutils.sysconfig import get_python_lib
 
 packages =  ['supybot.plugins.' + s for s in plugins]
 
@@ -29,7 +25,6 @@ package_data = { }
 
 for plugin in plugins:
     package_dir['supybot.plugins.' + plugin] = plugin
-    package_data['supybot.plugins.' + plugin] = ['docs/*.txt']
 
 version = '0.2'
 setup(
