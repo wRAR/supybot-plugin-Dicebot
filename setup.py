@@ -26,7 +26,7 @@ package_data = { }
 for plugin in plugins:
     package_dir['supybot.plugins.' + plugin] = plugin
 
-version = '0.2'
+version = '0.3'
 setup(
     name='supybot-plugin-dicebot',
     version=version,
