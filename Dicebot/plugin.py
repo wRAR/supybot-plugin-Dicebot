@@ -155,7 +155,7 @@ class Dicebot(callbacks.Plugin):
         Rolls a die with <sides> number of sides <dice> times, summarizes the
         results and adds optional modifier <modifier>
         For example, 2d6 will roll 2 six-sided dice; 10d10-3 will roll 10
-        ten-sided dice and substract 3 from the total result.
+        ten-sided dice and subtract 3 from the total result.
         """
         if self._autoRollEnabled(irc, msg.args[0]):
             return
