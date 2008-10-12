@@ -30,13 +30,10 @@
 import re
 import random
 
-import supybot.utils as utils
-from supybot.commands import *
+from supybot.commands import wrap
+from supybot.utils.str import format
 import supybot.ircmsgs as ircmsgs
-import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
-
-from supybot.utils.iter import all
 
 class Dicebot(callbacks.Plugin):
     """This plugin supports rolling the dice using !roll 4d20+3 as well as
