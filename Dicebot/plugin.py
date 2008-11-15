@@ -59,10 +59,8 @@ class Dicebot(callbacks.Plugin):
         return res
 
     def _formatMod(self, mod):
-        if mod < 0:
-            return str(mod)
-        elif mod > 0:
-            return '+' + str(mod)
+        if mod != 0:
+            return '%+d' % mod            
         else:
             return ''
 
