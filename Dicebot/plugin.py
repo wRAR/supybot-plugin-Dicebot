@@ -59,14 +59,8 @@ class Dicebot(callbacks.Plugin):
             res += random.randrange(1, sides+1)
         return res
 
-    def _rollMultiple(self, dice, sides, rolls=1, mod=0, explode=None):
-        res = []
-        for i in xrange(rolls):
-            rolled = self._roll(dice, sides, mod)
-            res.append(rolled)
-            if explode and rolled >= explode:
-                res.extend(self._rollMultiple(dice, sides, 1, mod, explode))
-        return res
+    def _rollMultiple(self, dice, sides, rolls=1, mod=0):
+        return [self._roll(dice, sides, mod) for i in xrange(rolls)]
 
     def _formatMod(self, mod):
         if mod != 0:
