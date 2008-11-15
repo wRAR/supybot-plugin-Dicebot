@@ -46,6 +46,7 @@ class Dicebot(callbacks.Plugin):
     rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
     rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
     rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
+    rollRe7Sea     = re.compile(r'\b(?P<rolls>\d+)k(?P<keep>\d+)\b')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -79,6 +80,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollReStandard, self._parseStandardRoll),
                 (self.rollReSR, self._parseShadowrunRoll),
                 (self.rollReSRX, self._parseShadowrunXRoll),
+                (self.rollRe7Sea, self._parse7SeaRoll),
                 ]
         results = [ ]
         for word in text.split():
@@ -147,6 +149,20 @@ class Dicebot(callbacks.Plugin):
         if isGlitch:
             return '(pool %d%s) critical glitch!' % (pool, explStr)
         return '(pool %d%s) 0 hits' % (pool, explStr)
+
+    def _parse7SeaRoll(self, m):
+        rolls = int(m.group('rolls'))
+        if rolls < 1 or rolls > self.MAX_ROLLS:
+            return
+        keep = int(m.group('keep'))
+        if keep < 1 or keep > self.MAX_ROLLS:
+            return
+        if keep > rolls:
+            keep = rolls
+        L = sorted(self._rollMultiple(1, 10, rolls, 0, 10), reverse=True)
+        self.log.debug(format("%L", [str(i) for i in L]))
+        L = L[:keep]
+        return '[%dk%d] (%d) %s' % (rolls, keep, sum(L), ', '.join([str(i) for i in L]))
 
     def _autoRollEnabled(self, irc, channel):
         return ((irc.isChannel(channel) and
