@@ -159,10 +159,19 @@ class Dicebot(callbacks.Plugin):
             return
         if keep > rolls:
             keep = rolls
-        L = sorted(self._rollMultiple(1, 10, rolls, 0, 10), reverse=True)
+        L = self._rollMultiple(1, 10, rolls)
+        for i in xrange(len(L)):
+            if L[i] == 10:
+                while True:
+                    rerolled = self._roll(1, 10)
+                    L[i] += rerolled
+                    if rerolled < 10:
+                        break
         self.log.debug(format("%L", [str(i) for i in L]))
-        L = L[:keep]
-        return '[%dk%d] (%d) %s' % (rolls, keep, sum(L), ', '.join([str(i) for i in L]))
+        L = sorted(L, reverse=True)[:keep]
+
+        return '[%dk%d] (%d) %s' % (rolls, keep, sum(L),
+                                    ', '.join([str(i) for i in L]))
 
     def _autoRollEnabled(self, irc, channel):
         return ((irc.isChannel(channel) and
