@@ -58,9 +58,18 @@ class Dicebot(callbacks.Plugin):
             res += random.randrange(1, sides+1)
         return res
 
+    def _rollMultiple(self, dice, sides, rolls=1, mod=0, explode=None):
+        res = []
+        for i in xrange(rolls):
+            rolled = self._roll(dice, sides, mod)
+            res.append(rolled)
+            if explode and rolled >= explode:
+                res.extend(self._rollMultiple(dice, sides, 1, mod, explode))
+        return res
+
     def _formatMod(self, mod):
         if mod != 0:
-            return '%+d' % mod            
+            return '%+d' % mod
         else:
             return ''
 
@@ -99,14 +108,15 @@ class Dicebot(callbacks.Plugin):
         mod = int(m.group('mod') or 0)
         if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
             return
-        L = [str(self._roll(dice, sides, mod)) for i in xrange(rolls)]
-        return '[%dd%d%s] %s' % (dice, sides, self._formatMod(mod), ', '.join(L))
+        L = self._rollMultiple(dice, sides, rolls, mod)
+        return '[%dd%d%s] %s' % (dice, sides, self._formatMod(mod),
+                                 ', '.join([str(i) for i in L]))
 
     def _parseShadowrunRoll(self, m):
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
-        L = [self._roll(1, 6) for i in xrange(rolls)]
+        L = self._rollMultiple(1, 6, rolls)
         self.log.debug(format("%L", [str(i) for i in L]))
         return self._processSRResults(L, rolls)
 
@@ -114,11 +124,11 @@ class Dicebot(callbacks.Plugin):
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
-        L = [self._roll(1, 6) for i in xrange(rolls)]
+        L = self._rollMultiple(1, 6, rolls)
         self.log.debug(format("%L", [str(i) for i in L]))
         reroll = L.count(6)
         while reroll:
-            rerolled = [self._roll(1, 6) for i in xrange(reroll)]
+            rerolled = self._rollMultiple(1, 6, reroll)
             self.log.debug(format("%L", [str(i) for i in rerolled]))
             L.extend([r for r in rerolled if r >= 5])
             reroll = rerolled.count(6)
