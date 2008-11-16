@@ -165,8 +165,9 @@ class Dicebot(callbacks.Plugin):
                             break
         self.log.debug(format("%L", [str(i) for i in L]))
         L = sorted(L, reverse=True)[:keep]
+        explodeStr = ', not exploding' if not explode else ''
 
-        return '[%dk%d] (%d) %s' % (rolls, keep, sum(L),
+        return '[%dk%d%s] (%d) %s' % (rolls, keep, explodeStr, sum(L),
                                     ', '.join([str(i) for i in L]))
 
     def _autoRollEnabled(self, irc, channel):
