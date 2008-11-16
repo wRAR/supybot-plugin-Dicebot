@@ -46,7 +46,7 @@ class Dicebot(callbacks.Plugin):
     rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
     rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
     rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
-    rollRe7Sea     = re.compile(r'\b(?P<rolls>\d+)k(?P<keep>\d+)\b')
+    rollRe7Sea     = re.compile(r'\b(?P<rolls>\d+)k(?P<keep>\d+)(?P<noexpl>-?)')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -149,18 +149,20 @@ class Dicebot(callbacks.Plugin):
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
         keep = int(m.group('keep'))
+        explode = m.group('noexpl') != '-'
         if keep < 1 or keep > self.MAX_ROLLS:
             return
         if keep > rolls:
             keep = rolls
         L = self._rollMultiple(1, 10, rolls)
-        for i in xrange(len(L)):
-            if L[i] == 10:
-                while True:
-                    rerolled = self._roll(1, 10)
-                    L[i] += rerolled
-                    if rerolled < 10:
-                        break
+        if explode:
+            for i in xrange(len(L)):
+                if L[i] == 10:
+                    while True:
+                        rerolled = self._roll(1, 10)
+                        L[i] += rerolled
+                        if rerolled < 10:
+                            break
         self.log.debug(format("%L", [str(i) for i in L]))
         L = sorted(L, reverse=True)[:keep]
 
