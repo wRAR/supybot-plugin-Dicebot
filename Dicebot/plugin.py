@@ -27,6 +27,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ###
 
+from .deck import Deck
+
 import re
 import random
 
@@ -52,6 +54,10 @@ class Dicebot(callbacks.Plugin):
     MIN_SIDES = 2
     MAX_SIDES = 100
     MAX_ROLLS = 30
+
+    def __init__(self, irc):
+        super(Dicebot, self).__init__(irc)
+        self.deck = Deck()
 
     def _roll(self, dice, sides, mod=0):
         res = int(mod)
@@ -188,6 +194,23 @@ class Dicebot(callbacks.Plugin):
             return
         self._process(irc, text)
     roll = wrap(roll, ['somethingWithoutSpaces'])
+
+    def shuffle(self, irc, msg, args):
+        """takes no arguments
+
+        Restores and shuffles the deck."""
+        self.deck.shuffle()
+        irc.reply('shuffled')
+    shuffle = wrap(shuffle)
+
+    def draw(self, irc, msg, args):
+        """takes no arguments
+
+        Draws a card from the deck and shows it."""
+        card = self.deck.next()
+        irc.reply(card)
+    draw = wrap(draw)
+    deal = draw
 
     def doPrivmsg(self, irc, msg):
         if not self._autoRollEnabled(irc, msg.args[0]):
