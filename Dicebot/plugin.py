@@ -48,7 +48,7 @@ class Dicebot(callbacks.Plugin):
     rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
     rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
     rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
-    rollRe7Sea     = re.compile(r'\b(?P<rolls>\d+)k(?P<keep>\d+)(?P<noexpl>-?)')
+    rollRe7Sea     = re.compile(r'(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -102,7 +102,7 @@ class Dicebot(callbacks.Plugin):
             return
         res = self._roll(dice, sides, mod)
         return '[%dd%d%s] %d' % (dice, sides, self._formatMod(mod), res)
-        
+
     def _parseMultipleRoll(self, m):
         rolls = int(m.group('rolls') or 0)
         dice = int(m.group('dice') or 1)
@@ -155,7 +155,11 @@ class Dicebot(callbacks.Plugin):
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
         keep = int(m.group('keep'))
-        explode = m.group('noexpl') != '-'
+        mod = int(m.group('mod') or 0)
+        prefix = m.group('prefix')
+        k = m.group('k')
+        explode = prefix != '-'
+        unkept = (prefix == '+' or k == 'kk') and keep < rolls
         if keep < 1 or keep > self.MAX_ROLLS:
             return
         if keep > rolls:
@@ -170,11 +174,16 @@ class Dicebot(callbacks.Plugin):
                         if rerolled < 10:
                             break
         self.log.debug(format("%L", [str(i) for i in L]))
-        L = sorted(L, reverse=True)[:keep]
+        L.sort(reverse=True)
+        keptDice = L[:keep]
+        unkeptDice = L[keep:]
         explodeStr = ', not exploding' if not explode else ''
+        unkeptStr = ' | %s' % ', '.join([str(i) for i in unkeptDice]) if unkept else ''
 
-        return '[%dk%d%s] (%d) %s' % (rolls, keep, explodeStr, sum(L),
-                                    ', '.join([str(i) for i in L]))
+        return '[%dk%d%s%s] (%d) %s%s' % (rolls, keep, self._formatMod(mod),
+                                          explodeStr, sum(keptDice) + mod,
+                                          ', '.join([str(i) for i in keptDice]),
+                                          unkeptStr)
 
     def _autoRollEnabled(self, irc, channel):
         return ((irc.isChannel(channel) and
