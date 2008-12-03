@@ -32,7 +32,7 @@ from .deck import Deck
 import re
 import random
 
-from supybot.commands import wrap
+from supybot.commands import additional, wrap
 from supybot.utils.str import format
 import supybot.ircmsgs as ircmsgs
 import supybot.callbacks as callbacks
@@ -212,13 +212,13 @@ class Dicebot(callbacks.Plugin):
         irc.reply('shuffled')
     shuffle = wrap(shuffle)
 
-    def draw(self, irc, msg, args):
-        """takes no arguments
+    def draw(self, irc, msg, args, count):
+        """[<count>]
 
-        Draws a card from the deck and shows it."""
-        card = self.deck.next()
-        irc.reply(card)
-    draw = wrap(draw)
+        Draws <count> cards (1 if omitted) from the deck and shows them."""
+        cards = [self.deck.next() for i in xrange(count)]
+        irc.reply(', '.join(cards))
+    draw = wrap(draw, [additional('positiveInt', 1)])
     deal = draw
 
     def doPrivmsg(self, irc, msg):
