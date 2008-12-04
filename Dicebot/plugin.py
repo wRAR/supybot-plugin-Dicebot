@@ -164,6 +164,12 @@ class Dicebot(callbacks.Plugin):
             return
         if keep > rolls:
             keep = rolls
+        if rolls > 10:
+            keep += rolls - 10
+            rolls = 10
+        if keep > 10:
+            mod += (keep - 10) * 10
+            keep = 10
         L = self._rollMultiple(1, 10, rolls)
         if explode:
             for i in xrange(len(L)):
