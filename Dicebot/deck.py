@@ -31,19 +31,41 @@
 import random
 
 class Deck:
-    titles = ['deuce', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'jack', 'queen', 'king', 'ace']
+    """
+    54-card deck simulator.
+
+    This class represents a standard 54-card deck (with 2 different Jokers)
+    and supports shuffling and drawing.
+    """
+    titles = ['deuce', 'three', 'four', 'five', 'six', 'seven', 'eight',
+              'nine', 'ten', 'jack', 'queen', 'king', 'ace']
     suits = ['clubs', 'diamonds', 'hearts', 'spades']
-    base_deck = ['Black Joker', 'Red Joker'] + [t + ' of ' + s for t in titles for s in suits]
+    base_deck = ['Black Joker', 'Red Joker'] + [t + ' of ' + s
+                                                for t in titles for s in suits]
 
     def __init__(self):
+        """
+        Initialize a new deck and shuffle it.
+        """
         self.deck = []
         self.shuffle()
 
     def shuffle(self):
+        """
+        Restore and shuffle the deck.
+
+        All cards are returned to the deck and then shuffled randomly.
+        """
         self.deck = self.base_deck[:]
         random.shuffle(self.deck)
 
     def next(self):
+        """
+        Draw the top card from the deck and return it.
+
+        Drawn card is removed from the deck. If it was the last card, deck is
+        shuffled.
+        """
         card = self.deck.pop()
         if (self.deck == []):
             self.shuffle()

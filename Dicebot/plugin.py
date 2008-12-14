@@ -60,21 +60,55 @@ class Dicebot(callbacks.Plugin):
         self.deck = Deck()
 
     def _roll(self, dice, sides, mod=0):
+        """
+        Roll a die several times, return sum of the results plus the static modifier.
+
+        Arguments:
+        dice -- number of dice rolled;
+        sides -- number of sides each die has;
+        mod -- number added to the total result (optional);
+        """
         res = int(mod)
         for i in xrange(dice):
             res += random.randrange(1, sides+1)
         return res
 
     def _rollMultiple(self, dice, sides, rolls=1, mod=0):
+        """
+        Roll several dice several times, return a list of results.
+
+        Specified number of dice with specified sides is rolled several times.
+        Each time the sum of results is calculated, with optional modifier
+        added. The list of these sums is returned.
+
+        Arguments:
+        dice -- number of dice rolled each time;
+        sides -- number of sides each die has;
+        rolls -- number of times dice are rolled;
+        mod -- number added to the each total result (optional);
+        """
         return [self._roll(dice, sides, mod) for i in xrange(rolls)]
 
     def _formatMod(self, mod):
+        """
+        Format a numeric modifier for printing expressions such as 1d20+3.
+
+        Nonzero numbers are formatted with a sign, zero is formatted as an
+        empty string.
+        """
         if mod != 0:
             return '%+d' % mod
         else:
             return ''
 
     def _process(self, irc, text):
+        """
+        Process a message and reply with roll results, if any.
+
+        The message is split to the words and each word is checked against all
+        known expression forms (first applicable form is used). All results
+        are printed together in the IRC reply.
+        """
         checklist = [
                 (self.rollReMultiple, self._parseMultipleRoll),
                 (self.rollReStandard, self._parseStandardRoll),
@@ -95,6 +129,12 @@ class Dicebot(callbacks.Plugin):
             irc.reply('; '.join(results))
 
     def _parseStandardRoll(self, m):
+        """
+        Parse rolls such as 2d6+2.
+
+        This is a roll of several dice with an optional static modifier. It
+        yields one number (the sum of results and modifier).
+        """
         dice = int(m.group('dice') or 1)
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
@@ -104,6 +144,9 @@ class Dicebot(callbacks.Plugin):
         return '[%dd%d%s] %d' % (dice, sides, self._formatMod(mod), res)
 
     def _parseMultipleRoll(self, m):
+        """
+        Parse rolls such as 3#2d6+2.
+        """
         rolls = int(m.group('rolls') or 0)
         dice = int(m.group('dice') or 1)
         sides = int(m.group('sides'))
@@ -115,6 +158,9 @@ class Dicebot(callbacks.Plugin):
                                  ', '.join([str(i) for i in L]))
 
     def _parseShadowrunRoll(self, m):
+        """
+        Parse Shadowrun-specific roll such as 3#sd.
+        """
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
@@ -123,6 +169,9 @@ class Dicebot(callbacks.Plugin):
         return self._processSRResults(L, rolls)
 
     def _parseShadowrunXRoll(self, m):
+        """
+        Parse Shadowrun-specific 'exploding' roll such as 3#sdx.
+        """
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
@@ -151,6 +200,9 @@ class Dicebot(callbacks.Plugin):
         return '(pool %d%s) 0 hits' % (pool, explStr)
 
     def _parse7SeaRoll(self, m):
+        """
+        Parse 7th Sea-specific roll (4k2 is its simplest form).
+        """
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
@@ -192,6 +244,9 @@ class Dicebot(callbacks.Plugin):
                                           unkeptStr)
 
     def _autoRollEnabled(self, irc, channel):
+        """
+        Check if automatic rolling is enabled for this context.
+        """
         return ((irc.isChannel(channel) and
                 self.registryValue('autoRoll', channel)) or
                 (not irc.isChannel(channel) and
