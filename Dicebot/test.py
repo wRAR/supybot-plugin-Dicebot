@@ -27,7 +27,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 ###
 
-from supybot.test import *
+from supybot.test import PluginTestCase
 
 class DicebotTestCase(PluginTestCase):
     plugins = ('Dicebot',)
