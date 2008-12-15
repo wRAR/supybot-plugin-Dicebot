@@ -211,7 +211,6 @@ class Dicebot(callbacks.Plugin):
         prefix = m.group('prefix')
         k = m.group('k')
         explode = prefix != '-'
-        unkept = (prefix == '+' or k == 'kk') and keep < rolls
         if keep < 1 or keep > self.MAX_ROLLS:
             return
         if keep > rolls:
@@ -222,6 +221,7 @@ class Dicebot(callbacks.Plugin):
         if keep > 10:
             mod += (keep - 10) * 10
             keep = 10
+        unkept = (prefix == '+' or k == 'kk') and keep < rolls
         L = self._rollMultiple(1, 10, rolls)
         if explode:
             for i in xrange(len(L)):
