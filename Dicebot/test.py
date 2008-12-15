@@ -31,6 +31,63 @@ from supybot.test import PluginTestCase
 
 class DicebotTestCase(PluginTestCase):
     plugins = ('Dicebot',)
+    def testPlugin(self):
+        self.assertHelp('dicebot roll')
+        self.assertNotError('dicebot roll 1d2')
+        self.assertNoResponse('dicebot roll dummy')
 
+    def testRollStd(self):
+        self.assertRegexp('dicebot roll 1d20', r'\[1d20\] \d+')
+        self.assertRegexp('dicebot roll d20', r'\[1d20\] \d+')
+        self.assertRegexp('dicebot roll 1d20+5', r'\[1d20\+5\] \d+')
+        self.assertRegexp('dicebot roll d20+5', r'\[1d20\+5\] \d+')
+        self.assertRegexp('dicebot roll 1d20-30', r'\[1d20-30\] -\d+')
+        self.assertRegexp('dicebot roll d20-30', r'\[1d20-30\] -\d+')
+        self.assertRegexp('dicebot roll 2d20-1', r'\[2d20-1\] \d+')
+        self.assertNoResponse('dicebot roll 1d1')
+
+    def testRollMult(self):
+        self.assertRegexp('dicebot roll 2#1d20', r'\[1d20\] \d+, \d+')
+        self.assertRegexp('dicebot roll 2#d20', r'\[1d20\] \d+, \d+')
+        self.assertRegexp('dicebot roll 2#1d20+5', r'\[1d20\+5\] \d+, \d+')
+        self.assertRegexp('dicebot roll 2#d20+5', r'\[1d20\+5\] \d+, \d+')
+        self.assertRegexp('dicebot roll 2#1d20-30', r'\[1d20-30\] -\d+, -\d+')
+        self.assertRegexp('dicebot roll 2#d20-30', r'\[1d20-30\] -\d+, -\d+')
+        self.assertRegexp('dicebot roll 2#2d20-1', r'\[2d20-1\] \d+, \d+')
+        self.assertNoResponse('dicebot roll 2#1d1')
+
+    def testRollSR(self):
+        self.assertRegexp('dicebot roll 2#sd', r'\(pool 2\) (\d hits?|critical glitch!)')
+        self.assertRegexp('dicebot roll 4#sd', r'\(pool 4\) (\d hits?(, glitch)?|critical glitch!)')
+        self.assertNoResponse('dicebot roll 0#sd')
+
+    def testRollSRX(self):
+        self.assertRegexp('dicebot roll 2#sdx', r'\(pool 2, exploding\) (\d hits?|critical glitch!)')
+        self.assertRegexp('dicebot roll 4#sdx', r'\(pool 4, exploding\) (\d hits?(, glitch)?|critical glitch!)')
+        self.assertNoResponse('dicebot roll 0#sdx')
+
+    def testRoll7S(self):
+        self.assertRegexp('dicebot roll 3k2', r'\[3k2\] \(\d+\) \d+, \d+')
+        self.assertRegexp('dicebot roll 2k3', r'\[2k2\] \(\d+\) \d+, \d+')
+        self.assertRegexp('dicebot roll 3kk2', r'\[3k2\] \(\d+\) \d+, \d+ \| \d+')
+        self.assertRegexp('dicebot roll +3k2', r'\[3k2\] \(\d+\) \d+, \d+ \| \d+')
+        self.assertRegexp('dicebot roll -3k2', r'\[3k2, not exploding\] \(\d+\) \d+, \d+')
+        self.assertRegexp('dicebot roll +3kk2', r'\[3k2\] \(\d+\) \d+, \d+ \| \d+')
+        self.assertRegexp('dicebot roll -3kk2', r'\[3k2, not exploding\] \(\d+\) \d+, \d+ \| \d+')
+        self.assertRegexp('dicebot roll 3k2+1', r'\[3k2\+1\] \(\d+\) \d+, \d+')
+        self.assertRegexp('dicebot roll 3k2-1', r'\[3k2-1\] \(\d+\) \d+, \d+')
+        self.assertRegexp('dicebot roll -3k2-1', r'\[3k2-1, not exploding\] \(\d+\) \d+, \d+')
+        self.assertRegexp('dicebot roll 10k10', r'\[10k10\] \(\d+\) (\d+, ){9}\d+')
+        self.assertRegexp('dicebot roll 12k10', r'\[10k10\+20\] \(\d+\) (\d+, ){9}\d+')
+        self.assertRegexp('dicebot roll 12k9', r'\[10k10\+10\] \(\d+\) (\d+, ){9}\d+')
+        self.assertRegexp('dicebot roll 12k8', r'\[10k10\] \(\d+\) (\d+, ){9}\d+')
+        self.assertRegexp('dicebot roll 12k9+5', r'\[10k10\+15\] \(\d+\) (\d+, ){9}\d+')
+        self.assertRegexp('dicebot roll 12kk9', r'\[10k10\+10\] \(\d+\) (\d+, ){9}\d+')
+        self.assertRegexp('dicebot roll 12kk7', r'\[10k9\] \(\d+\) (\d+, ){8}\d+ \| \d+')
+
+    def testDeck(self):
+        self.assertRegexp('dicebot draw', r'\w+ of \w+|\w+ Joker')
+        self.assertResponse('dicebot shuffle', 'shuffled')
+        self.assertRegexp('dicebot draw', r'\w+ of \w+|\w+ Joker')
 
 # vim:set shiftwidth=4 tabstop=8 expandtab textwidth=78:
