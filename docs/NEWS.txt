@@ -1,3 +1,9 @@
+0.4
+~~~
+- 7th Sea support added.
+- Basic card deck simulation added.
+- Tests added.
+
 0.3
 ~~~
 - Shadowrun 4 support added (see Shadowrun.txt).
