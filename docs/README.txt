@@ -32,16 +32,26 @@ confusing during normal talk, so it can be enabled only when it is needed.
 requesting user's nick and requested expression.
 7. If you use several expressions in one message, bot will roll all of them and
 return all the results in one reply, separated with semicolon.
-8. Shadowrun 4ed support, see included Shadowrun.txt.
+8. Shadowrun 4ed support, see included Shadowrun.txt; 7th Sea RnK support, see
+7th Sea.txt.
 9. Concerning extensibility, you just need to add a regex for your expression
 and a function which parses that expression and returns a string which will be
 displayed.
+10. Also includes basic card deck simulator, see below.
 
 Configuration
 ~~~~~~~~~~~~~
 autoRoll (per-channel): whether to roll all expressions seen on the channel
 autoRollInPrivate (global): whether to roll expressions in the queries
 Both settings are off by default, so that bot replies only to explicit !roll.
+
+Deck
+~~~~
+Bot has a 54-card deck which it can shuffle (!shuffle command) and from which
+you can draw (!draw or !deal command, with optional number argument if you want
+to draw several cards). Drawn card is removed from the deck, but shuffle
+restores full deck. If the last card is drawn, the deck is automatically
+shuffled before drawing next card.
 
 To be done
 ~~~~~~~~~~
