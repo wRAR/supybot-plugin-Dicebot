@@ -1,8 +1,6 @@
 build
 dist
 MANIFEST
-.project
-.pydevproject
 backup
 test-conf
 test-data
