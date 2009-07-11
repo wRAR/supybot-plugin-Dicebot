@@ -309,7 +309,8 @@ class Dicebot(callbacks.Plugin):
     def shuffle(self, irc, msg, args):
         """takes no arguments
 
-        Restores and shuffles the deck."""
+        Restores and shuffles the deck.
+        """
         self.deck.shuffle()
         irc.reply('shuffled')
     shuffle = wrap(shuffle)
@@ -317,7 +318,8 @@ class Dicebot(callbacks.Plugin):
     def draw(self, irc, msg, args, count):
         """[<count>]
 
-        Draws <count> cards (1 if omitted) from the deck and shows them."""
+        Draws <count> cards (1 if omitted) from the deck and shows them.
+        """
         cards = [self.deck.next() for i in xrange(count)]
         irc.reply(', '.join(cards))
     draw = wrap(draw, [additional('positiveInt', 1)])
