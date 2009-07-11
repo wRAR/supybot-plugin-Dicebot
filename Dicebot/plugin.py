@@ -49,6 +49,7 @@ class Dicebot(callbacks.Plugin):
     rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
     rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
     rollRe7Sea     = re.compile(r'(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?')
+    rollReWoD      = re.compile(r'\b(?P<rolls>\d+)w(?P<explode>\d|-)?(\s|$)')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -115,6 +116,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollReSR, self._parseShadowrunRoll),
                 (self.rollReSRX, self._parseShadowrunXRoll),
                 (self.rollRe7Sea, self._parse7SeaRoll),
+                (self.rollReWoD, self._parseWoDRoll),
                 ]
         results = [ ]
         for word in text.split():
@@ -242,6 +244,45 @@ class Dicebot(callbacks.Plugin):
                                           explodeStr, sum(keptDice) + mod,
                                           ', '.join([str(i) for i in keptDice]),
                                           unkeptStr)
+
+    def _parseWoDRoll(self, m):
+        """
+        Parse New World of Darkness roll (5w)
+        """
+        rolls = int(m.group('rolls'))
+        if rolls < 1 or rolls > self.MAX_ROLLS:
+            return
+        if m.group('explode') == '-':
+            explode = 0
+        elif m.group('explode') != None and m.group('explode').isdigit():
+            explode = int(m.group('explode'))
+            if explode < 8 or explode > 10:
+                explode = 10
+        else:
+            explode = 10
+        L = self._rollMultiple(1, 10, rolls)
+        self.log.debug(format("%L", [str(i) for i in L]))
+        successes = len([x for x in L if x >= 8])
+        if explode:
+            for i in xrange(len(L)):
+                if L[i] >= explode:
+                    while True:
+                        rerolled = self._roll(1, 10)
+                        self.log.debug(str(rerolled))
+                        if rerolled >= 8:
+                            successes += 1
+                        if rerolled < explode:
+                            break
+
+        if explode == 0:
+            explStr = ', not exploding'
+        elif explode != 10:
+            explStr = ', %d-again' % explode
+        else:
+            explStr = ''
+
+        result = format('%n', (successes, 'success')) if successes > 0 else 'FAIL'
+        return '(%d%s) %s' % (rolls, explStr, result)
 
     def _autoRollEnabled(self, irc, channel):
         """
