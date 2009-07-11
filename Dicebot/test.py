@@ -90,4 +90,10 @@ class DicebotTestCase(PluginTestCase):
         self.assertResponse('dicebot shuffle', 'shuffled')
         self.assertRegexp('dicebot draw', r'\w+ of \w+|\w+ Joker')
 
+    def testWoD(self):
+        self.assertRegexp('dicebot roll 3w', r'\(3\) (\d success(es)?|FAIL)')
+        self.assertRegexp('dicebot roll 3w-', r'\(3, not exploding\) (\d success(es)?|FAIL)')
+        self.assertRegexp('dicebot roll 3w8', r'\(3, 8-again\) (\d success(es)?|FAIL)')
+        self.assertNoResponse('dicebot roll 0w')
+
 # vim:set shiftwidth=4 tabstop=8 expandtab textwidth=78:
