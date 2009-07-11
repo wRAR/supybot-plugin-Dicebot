@@ -194,9 +194,9 @@ class Dicebot(callbacks.Plugin):
         isGlitch = ones >= (pool + 1) / 2
         explStr = ', exploding' if isExploding else ''
         if isHit:
-            hitsStr = 'hits' if hits > 1 else 'hit'
+            hitsStr = format('%n', (hits, 'hit'))
             glitchStr = ', glitch' if isGlitch else ''
-            return '(pool %d%s) %d %s%s' % (pool, explStr, hits, hitsStr, glitchStr)
+            return '(pool %d%s) %s%s' % (pool, explStr, hitsStr, glitchStr)
         if isGlitch:
             return '(pool %d%s) critical glitch!' % (pool, explStr)
         return '(pool %d%s) 0 hits' % (pool, explStr)
