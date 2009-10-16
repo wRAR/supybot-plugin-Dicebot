@@ -96,4 +96,11 @@ class DicebotTestCase(PluginTestCase):
         self.assertRegexp('dicebot roll 3w8', r'\(3, 8-again\) (\d success(es)?|FAIL)')
         self.assertNoResponse('dicebot roll 0w')
 
+    def testDH(self):
+        self.assertRegexp('dicebot roll vs(10)', r'-?\d+ \(\d+ vs 10\)')
+        self.assertRegexp('dicebot roll vs(10+20)', r'-?\d+ \(\d+ vs 30\)')
+        self.assertRegexp('dicebot roll vs(10+20-5)', r'-?\d+ \(\d+ vs 25\)')
+        self.assertRegexp('dicebot roll 3vs(10+20)', r'-?\d+, -?\d+, -?\d+ \(\d+, \d+, \d+ vs 30\)')
+
+
 # vim:set shiftwidth=4 tabstop=8 expandtab textwidth=78:
