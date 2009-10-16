@@ -51,6 +51,7 @@ class Dicebot(callbacks.Plugin):
     rollRe7Sea     = re.compile(r'(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?')
     rollReWoD      = re.compile(r'\b(?P<rolls>\d+)w(?P<explode>\d|-)?(\s|$)')
     rollReDH       = re.compile(r'\bvs\((?P<thr>([-+]|\d)+)\)(\s|$)')
+    rollReDHMultiple = re.compile(r'\b(?P<rolls>\d+)vs\((?P<thr>([-+]|\d)+)\)(\s|$)')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -119,6 +120,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollRe7Sea, self._parse7SeaRoll),
                 (self.rollReWoD, self._parseWoDRoll),
                 (self.rollReDH, self._parseDHRoll),
+                (self.rollReDHMultiple, self._parseDHMultipleRoll),
                 ]
         results = [ ]
         for word in text.split():
@@ -297,8 +299,29 @@ class Dicebot(callbacks.Plugin):
             return
 
         threshold = eval(thresholdExpr)
-        res = -self._roll(1, 100, -threshold)
-        return '(vs %d) %d' % (threshold, res)
+        roll = self._roll(1, 100)
+        res = threshold - roll
+        return '%d (%d vs %d)' % (res, roll, threshold)
+
+    def _parseDHMultipleRoll(self, m):
+        """
+        Parse multiple Dark Heresy rolls (3#vs(20+30-10))
+        """
+        rolls = int(m.group('rolls'))
+        if rolls < 1 or rolls > self.MAX_ROLLS:
+            return
+
+        thresholdExpr = m.group('thr')
+        # additional validation
+        if not re.match(r'^[+\-]?\d{1,4}([+\-]\d{1,4})*$', thresholdExpr):
+            return
+
+        threshold = eval(thresholdExpr)
+        rollResults = self._rollMultiple(1, 100, rolls)
+        results = [threshold - roll for roll in rollResults]
+        return '%s (%s vs %d)' % (', '.join([str(i) for i in results]),
+                                  ', '.join([str(i) for i in rollResults]),
+                                  threshold)
 
     def _autoRollEnabled(self, irc, channel):
         """
