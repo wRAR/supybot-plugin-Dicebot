@@ -44,8 +44,7 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'\b(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
-    rollReMultiple = re.compile(r'\b(?P<rolls>\d+)#(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
+    rollReStandard = re.compile(r'\b((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
     rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
     rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
     rollRe7Sea     = re.compile(r'(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?')
@@ -112,7 +111,6 @@ class Dicebot(callbacks.Plugin):
         are printed together in the IRC reply.
         """
         checklist = [
-                (self.rollReMultiple, self._parseMultipleRoll),
                 (self.rollReStandard, self._parseStandardRoll),
                 (self.rollReSR, self._parseShadowrunRoll),
                 (self.rollReSRX, self._parseShadowrunXRoll),
@@ -134,24 +132,13 @@ class Dicebot(callbacks.Plugin):
 
     def _parseStandardRoll(self, m):
         """
-        Parse rolls such as 2d6+2.
-
-        This is a roll of several dice with an optional static modifier. It
-        yields one number (the sum of results and modifier).
-        """
-        dice = int(m.group('dice') or 1)
-        sides = int(m.group('sides'))
-        mod = int(m.group('mod') or 0)
-        if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
-            return
-        res = self._roll(dice, sides, mod)
-        return '[%dd%d%s] %d' % (dice, sides, self._formatMod(mod), res)
-
-    def _parseMultipleRoll(self, m):
-        """
         Parse rolls such as 3#2d6+2.
+
+        This is a roll (or several rolls) of several dice with an optional
+        static modifier. It yields one number (the sum of results and
+        modifier) for each roll series.
         """
-        rolls = int(m.group('rolls') or 0)
+        rolls = int(m.group('rolls') or 1)
         dice = int(m.group('dice') or 1)
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
