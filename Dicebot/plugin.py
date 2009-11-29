@@ -97,10 +97,7 @@ class Dicebot(callbacks.Plugin):
         Nonzero numbers are formatted with a sign, zero is formatted as an
         empty string.
         """
-        if mod != 0:
-            return '%+d' % mod
-        else:
-            return ''
+        return ('%+d' % mod) if mod != 0 else ''
 
     def _process(self, irc, text):
         """
@@ -142,7 +139,8 @@ class Dicebot(callbacks.Plugin):
         dice = int(m.group('dice') or 1)
         sides = int(m.group('sides'))
         mod = int(m.group('mod') or 0)
-        if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS:
+        if (dice > self.MAX_DICE or sides > self.MAX_SIDES
+            or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS):
             return
         L = self._rollMultiple(dice, sides, rolls, mod)
         return '[%dd%d%s] %s' % (dice, sides, self._formatMod(mod),
