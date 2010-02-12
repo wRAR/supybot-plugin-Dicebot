@@ -151,7 +151,7 @@ class Dicebot(callbacks.Plugin):
         Parse Shadowrun-specific roll such as 3#sd.
         """
         rolls = int(m.group('rolls'))
-        if rolls < 1 or rolls > self.MAX_ROLLS:
+        if rolls < 1 or rolls > self.MAX_DICE:
             return
         L = self._rollMultiple(1, 6, rolls)
         self.log.debug(format("%L", [str(i) for i in L]))
@@ -162,7 +162,7 @@ class Dicebot(callbacks.Plugin):
         Parse Shadowrun-specific 'exploding' roll such as 3#sdx.
         """
         rolls = int(m.group('rolls'))
-        if rolls < 1 or rolls > self.MAX_ROLLS:
+        if rolls < 1 or rolls > self.MAX_DICE:
             return
         L = self._rollMultiple(1, 6, rolls)
         self.log.debug(format("%L", [str(i) for i in L]))
