@@ -84,6 +84,7 @@ class DicebotTestCase(PluginTestCase):
         self.assertRegexp('dicebot roll 12k9+5', r'\[10k10\+15\] \(\d+\) (\d+, ){9}\d+')
         self.assertRegexp('dicebot roll 12kk9', r'\[10k10\+10\] \(\d+\) (\d+, ){9}\d+')
         self.assertRegexp('dicebot roll 12kk7', r'\[10k9\] \(\d+\) (\d+, ){8}\d+ \| \d+')
+        self.assertRegexp('dicebot roll 3#3k2', r'\[3k2\] \(\d+\) \d+, \d+(; \(\d+\) \d+, \d+){2}')
 
     def testDeck(self):
         self.assertRegexp('dicebot draw', r'\w+ of \w+|\w+ Joker')
