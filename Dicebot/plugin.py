@@ -47,7 +47,7 @@ class Dicebot(callbacks.Plugin):
     rollReStandard = re.compile(r'^((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?$')
     rollReSR       = re.compile(r'^(?P<rolls>\d+)#sd$')
     rollReSRX      = re.compile(r'^(?P<rolls>\d+)#sdx$')
-    rollRe7Sea     = re.compile(r'^(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
+    rollRe7Sea     = re.compile(r'^((?P<count>\d+)#)?(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
     rollReWoD      = re.compile(r'^(?P<rolls>\d+)w(?P<explode>\d|-)?$')
     rollReDH       = re.compile(r'^(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
 
@@ -195,6 +195,7 @@ class Dicebot(callbacks.Plugin):
         rolls = int(m.group('rolls'))
         if rolls < 1 or rolls > self.MAX_ROLLS:
             return
+        count = int(m.group('count') or 1)
         keep = int(m.group('keep'))
         mod = int(m.group('mod') or 0)
         prefix = m.group('prefix')
@@ -211,26 +212,28 @@ class Dicebot(callbacks.Plugin):
             mod += (keep - 10) * 10
             keep = 10
         unkept = (prefix == '+' or k == 'kk') and keep < rolls
-        L = self._rollMultiple(1, 10, rolls)
-        if explode:
-            for i in xrange(len(L)):
-                if L[i] == 10:
-                    while True:
-                        rerolled = self._roll(1, 10)
-                        L[i] += rerolled
-                        if rerolled < 10:
-                            break
-        self.log.debug(format("%L", [str(i) for i in L]))
-        L.sort(reverse=True)
-        keptDice = L[:keep]
-        unkeptDice = L[keep:]
         explodeStr = ', not exploding' if not explode else ''
-        unkeptStr = ' | %s' % ', '.join([str(i) for i in unkeptDice]) if unkept else ''
+        results = []
+        for _ in xrange(count):
+            L = self._rollMultiple(1, 10, rolls)
+            if explode:
+                for i in xrange(len(L)):
+                    if L[i] == 10:
+                        while True:
+                            rerolled = self._roll(1, 10)
+                            L[i] += rerolled
+                            if rerolled < 10:
+                                break
+            self.log.debug(format("%L", [str(i) for i in L]))
+            L.sort(reverse=True)
+            keptDice, unkeptDice = L[:keep], L[keep:]
+            unkeptStr = ' | %s' % ', '.join([str(i) for i in unkeptDice]) if unkept else ''
+            keptStr = ', '.join([str(i) for i in keptDice])
+            results.append('(%d) %s%s' % (sum(keptDice) + mod, keptStr, unkeptStr))
 
-        return '[%dk%d%s%s] (%d) %s%s' % (rolls, keep, self._formatMod(mod),
-                                          explodeStr, sum(keptDice) + mod,
-                                          ', '.join([str(i) for i in keptDice]),
-                                          unkeptStr)
+        return '[%dk%d%s%s] %s' % (rolls, keep, self._formatMod(mod), explodeStr,
+                                   '; '.join(results))
+
 
     def _parseWoDRoll(self, m):
         """
