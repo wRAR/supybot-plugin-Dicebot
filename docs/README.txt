@@ -33,7 +33,7 @@ requesting user's nick and requested expression.
 7. If you use several expressions in one message, bot will roll all of them and
 return all the results in one reply, separated with semicolon.
 8. Shadowrun 4ed support, see included Shadowrun.txt; 7th Sea RnK support, see
-7th Sea.txt.
+7th Sea.txt; Dark Heresy/Rogue Trader support, see DH.txt.
 9. Concerning extensibility, you just need to add a regex for your expression
 and a function which parses that expression and returns a string which will be
 displayed.
