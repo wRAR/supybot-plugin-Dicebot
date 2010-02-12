@@ -1,3 +1,9 @@
+0.5
+~~~
+- Dark Heresy support added.
+- New WoD support added (undocumented and untested, though).
+- Multiroll support for 7th Sea.
+
 0.4
 ~~~
 - 7th Sea support added.
