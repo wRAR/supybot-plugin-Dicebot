@@ -44,12 +44,12 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'\b((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?\b')
-    rollReSR       = re.compile(r'\b(?P<rolls>\d+)#sd\b')
-    rollReSRX      = re.compile(r'\b(?P<rolls>\d+)#sdx\b')
-    rollRe7Sea     = re.compile(r'(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?')
-    rollReWoD      = re.compile(r'\b(?P<rolls>\d+)w(?P<explode>\d|-)?(\s|$)')
-    rollReDH       = re.compile(r'\b(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)(\s|$)')
+    rollReStandard = re.compile(r'^((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?$')
+    rollReSR       = re.compile(r'^(?P<rolls>\d+)#sd$')
+    rollReSRX      = re.compile(r'^(?P<rolls>\d+)#sdx$')
+    rollRe7Sea     = re.compile(r'^(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
+    rollReWoD      = re.compile(r'^(?P<rolls>\d+)w(?P<explode>\d|-)?$')
+    rollReDH       = re.compile(r'^(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
