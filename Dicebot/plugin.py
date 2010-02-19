@@ -44,13 +44,13 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'^((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?$')
-    rollReSR       = re.compile(r'^(?P<rolls>\d+)#sd$')
-    rollReSRX      = re.compile(r'^(?P<rolls>\d+)#sdx$')
-    rollReSRE      = re.compile(r'^(?P<pool>\d+),(?P<thr>\d+)#sde$')
-    rollRe7Sea     = re.compile(r'^((?P<count>\d+)#)?(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
-    rollReWoD      = re.compile(r'^(?P<rolls>\d+)w(?P<explode>\d|-)?$')
-    rollReDH       = re.compile(r'^(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
+    rollReStandard = re.compile(r'((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?$')
+    rollReSR       = re.compile(r'(?P<rolls>\d+)#sd$')
+    rollReSRX      = re.compile(r'(?P<rolls>\d+)#sdx$')
+    rollReSRE      = re.compile(r'(?P<pool>\d+),(?P<thr>\d+)#sde$')
+    rollRe7Sea     = re.compile(r'((?P<count>\d+)#)?(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
+    rollReWoD      = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
+    rollReDH       = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -120,7 +120,7 @@ class Dicebot(callbacks.Plugin):
         results = [ ]
         for word in text.split():
             for expr, parser in checklist:
-                m = expr.search(word)
+                m = expr.match(word)
                 if m:
                     r = parser(m)
                     if r:
