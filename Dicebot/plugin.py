@@ -33,7 +33,7 @@ import re
 import random
 
 from supybot.commands import additional, wrap
-from supybot.utils.str import format
+from supybot.utils.str import format, ordinal
 import supybot.ircmsgs as ircmsgs
 import supybot.callbacks as callbacks
 
@@ -47,6 +47,7 @@ class Dicebot(callbacks.Plugin):
     rollReStandard = re.compile(r'^((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?$')
     rollReSR       = re.compile(r'^(?P<rolls>\d+)#sd$')
     rollReSRX      = re.compile(r'^(?P<rolls>\d+)#sdx$')
+    rollReSRE      = re.compile(r'^(?P<pool>\d+),(?P<thr>\d+)#sde$')
     rollRe7Sea     = re.compile(r'^((?P<count>\d+)#)?(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
     rollReWoD      = re.compile(r'^(?P<rolls>\d+)w(?P<explode>\d|-)?$')
     rollReDH       = re.compile(r'^(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
@@ -111,6 +112,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollReStandard, self._parseStandardRoll),
                 (self.rollReSR, self._parseShadowrunRoll),
                 (self.rollReSRX, self._parseShadowrunXRoll),
+                (self.rollReSRE, self._parseShadowrunExtRoll),
                 (self.rollRe7Sea, self._parse7SeaRoll),
                 (self.rollReWoD, self._parseWoDRoll),
                 (self.rollReDH, self._parseDHRoll),
@@ -187,6 +189,42 @@ class Dicebot(callbacks.Plugin):
         if isGlitch:
             return '(pool %d%s) critical glitch!' % (pool, explStr)
         return '(pool %d%s) 0 hits' % (pool, explStr)
+
+    def _parseShadowrunExtRoll(self, m):
+        """
+        Parse Shadowrun-specific Extended test roll such as 14,3#sde.
+        """
+        pool = int(m.group('pool'))
+        if pool < 1 or pool > self.MAX_DICE:
+            return
+        threshold = int(m.group('thr'))
+        if threshold < 1 or threshold > self.MAX_DICE:
+            return
+        result = 0
+        passes = 0
+        glitches = []
+        critGlitch = None
+        while result < threshold:
+            L = self._rollMultiple(1, 6, pool)
+            self.log.debug(format('%L', [str(i) for i in L]))
+            hits = L.count(6) + L.count(5)
+            result += hits
+            passes += 1
+            isHit = hits > 0
+            isGlitch = L.count(1) >= (pool + 1) / 2
+            if isGlitch:
+                if not isHit:
+                    critGlitch = passes
+                    break
+                glitches.append(ordinal(passes))
+
+        glitchStr = format(', glitch at %L', glitches) if len(glitches) > 0 else ''
+        if critGlitch is None:
+            return format('(pool %i, threshold %i) %n, %n%s',
+                          pool, threshold, (passes, 'pass'), (result, 'hit'), glitchStr)
+        else:
+            return format('(pool %i, threshold %i) critical glitch at %s pass%s, %n so far',
+                          pool, threshold, ordinal(critGlitch), glitchStr, (result, 'hit'))
 
     def _parse7SeaRoll(self, m):
         """
