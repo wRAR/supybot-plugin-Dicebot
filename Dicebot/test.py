@@ -44,6 +44,9 @@ class DicebotTestCase(PluginTestCase):
         self.assertRegexp('dicebot roll 1d20-30', r'\[1d20-30\] -\d+')
         self.assertRegexp('dicebot roll d20-30', r'\[1d20-30\] -\d+')
         self.assertRegexp('dicebot roll 2d20-1', r'\[2d20-1\] \d+')
+        self.assertRegexp('dicebot roll d20-1d6+3', r'\[1d20-1d6\+3\] -?\d+')
+        self.assertRegexp('dicebot roll 1d20+d20+3', r'\[2d20\+3\] \d+')
+        self.assertRegexp('dicebot roll 1d20+4+d6-3', r'\[1d20\+1d6\+1\] \d+')
         self.assertNoResponse('dicebot roll 1d1')
 
     def testRollMult(self):

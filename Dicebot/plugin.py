@@ -29,6 +29,7 @@
 
 from .deck import Deck
 
+from operator import itemgetter
 import re
 import random
 
@@ -44,7 +45,7 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'((?P<rolls>\d+)#)?(?P<dice>\d*)d(?P<sides>\d+)(?P<mod>[+-]\d+)?$')
+    rollReStandard = re.compile(r'((?P<rolls>\d+)#)?(?P<spec>[+-]?(\d*d\d+|\d+)([+-](\d*d\d+|\d+))*)$')
     rollReSR       = re.compile(r'(?P<rolls>\d+)#sd$')
     rollReSRX      = re.compile(r'(?P<rolls>\d+)#sdx$')
     rollReSRE      = re.compile(r'(?P<pool>\d+),(?P<thr>\d+)#sde$')
@@ -131,22 +132,57 @@ class Dicebot(callbacks.Plugin):
 
     def _parseStandardRoll(self, m):
         """
-        Parse rolls such as 3#2d6+2.
+        Parse rolls such as 3#2d6+1d4+2.
 
-        This is a roll (or several rolls) of several dice with an optional
-        static modifier. It yields one number (the sum of results and
-        modifier) for each roll series.
+        This is a roll (or several rolls) of several dice with optional
+        static modifiers. It yields one number (the sum of results and
+        modifiers) for each roll series.
         """
         rolls = int(m.group('rolls') or 1)
-        dice = int(m.group('dice') or 1)
-        sides = int(m.group('sides'))
-        mod = int(m.group('mod') or 0)
-        if (dice > self.MAX_DICE or sides > self.MAX_SIDES
-            or sides < self.MIN_SIDES or rolls < 1 or rolls > self.MAX_ROLLS):
+        spec = m.group('spec')
+        if not spec[0] in '+-':
+            spec = '+' + spec
+        r = re.compile(r'(?P<sign>[+-])((?P<dice>\d*)d(?P<sides>\d+)|(?P<mod>\d+))')
+
+        totalMod = 0
+        totalDice = {}
+        for m in r.finditer(spec):
+            if not m.group('mod') is None:
+                totalMod += int(m.group('sign') + m.group('mod'))
+                continue
+            dice = int(m.group('dice') or 1)
+            sides = int(m.group('sides'))
+            if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
+                return
+            if (m.group('sign') == '-'):
+                sides *= -1
+            totalDice[sides] = totalDice.get(sides, 0) + dice
+
+        if (len(totalDice) == 0):
             return
-        L = self._rollMultiple(dice, sides, rolls, mod)
-        return '[%dd%d%s] %s' % (dice, sides, self._formatMod(mod),
-                                 ', '.join([str(i) for i in L]))
+
+        results = []
+        for _ in xrange(rolls):
+            result = totalMod
+            for sides, dice in totalDice.iteritems():
+                if sides > 0:
+                    result += self._roll(dice, sides)
+                else:
+                    result -= self._roll(dice, -sides)
+            results.append(result)
+
+        specFormatted = ''
+        self.log.debug(repr(totalDice))
+        for sides, dice in sorted(totalDice.items(), key=itemgetter(0), reverse=True):
+            if sides > 0:
+                if len(specFormatted) > 0:
+                    specFormatted += '+'
+                specFormatted += '%dd%d' % (dice, sides)
+            else:
+                specFormatted += '-%dd%d' % (dice, -sides)
+        specFormatted += self._formatMod(totalMod)
+
+        return '[%s] %s' % (specFormatted, ', '.join([str(i) for i in results]))
 
     def _parseShadowrunRoll(self, m):
         """
