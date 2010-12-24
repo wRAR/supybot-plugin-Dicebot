@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 plugins = [
-	'Dicebot',
+  'Dicebot',
     ]
 
 import sys
@@ -26,7 +26,7 @@ package_data = { }
 for plugin in plugins:
     package_dir['supybot.plugins.' + plugin] = plugin
 
-version = '0.5'
+version = '0.6'
 setup(
     name='supybot-plugin-dicebot',
     version=version,
@@ -39,7 +39,7 @@ setup(
     package_dir=package_dir,
     package_data=package_data,
     classifiers = [
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Plugins',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: BSD License',
