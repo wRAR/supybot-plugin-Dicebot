@@ -13,6 +13,10 @@ of Six (SR4, p.56), which means rerolling all 6's, potentially increasing the
 total hits number. This mode is used by saying 10#sdx (x stands for 'eXploding
 dice').
 
+You can make Extended tests by saying i.e. 10,8#sde. Here 10 is the pool size
+and 8 is the threshold. The output will include the number of passes, resulting
+hit number and, in case of glitches, the pass number of the first glitch.
+
 The current version of Shadowrun code will log all the rolled dice values
 (with the DEBUG level), to check the algorithm and for curious players.  This
 may be removed in future versions.

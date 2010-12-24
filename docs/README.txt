@@ -15,8 +15,9 @@ Features
 ~~~~~~~~
 1. Sum of dice rolled. Expression form is just '2d6', plugin returns the sum
 of dice values as one number.
-2. Sum of dice plus some fixed number. Expression: '2d6-2'. After summing up
-dice results the specified number is added (or subtracted) to the sum.
+2. Sum of several different dice and some fixed numbers. Expression:
+'2d6+3d8-2+10'. After summing up dice results the specified number is added (or
+subtracted) to the sum.
 3. Separate results of several identical rolls which use previously described
 form. This is written as '3#1d20+7' and yields 3 numbers, each meaning the
 result of rolling 1d20+7 as described above.
@@ -33,7 +34,7 @@ requesting user's nick and requested expression.
 7. If you use several expressions in one message, bot will roll all of them and
 return all the results in one reply, separated with semicolon.
 8. Shadowrun 4ed support, see included Shadowrun.txt; 7th Sea RnK support, see
-7th Sea.txt; Dark Heresy/Rogue Trader support, see DH.txt.
+7th Sea.txt; Dark Heresy/Rogue Trader/Deathwatch support, see DH.txt.
 9. Concerning extensibility, you just need to add a regex for your expression
 and a function which parses that expression and returns a string which will be
 displayed.
@@ -52,11 +53,6 @@ you can draw (!draw or !deal command, with optional number argument if you want
 to draw several cards). Drawn card is removed from the deck, but shuffle
 restores full deck. If the last card is drawn, the deck is automatically
 shuffled before drawing next card.
-
-To be done
-~~~~~~~~~~
-Calculating more advanced expressions: including several dice ('1d12+2d6+4'),
-including several modifiers ('1d20+10-3').
 
 Thanks
 ~~~~~~
