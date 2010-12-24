@@ -38,7 +38,7 @@ import supybot.world as world
 # in here if you're keeping the plugin in CVS or some similar system.
 __version__ = "0.5"
 
-__author__ = "Andrey Rahmatullin <wrar@altlinux.ru>"
+__author__ = "Andrey Rahmatullin <wrar@wrar.name>"
 
 # This is a dictionary mapping supybot.Author instances to lists of
 # contributions.
