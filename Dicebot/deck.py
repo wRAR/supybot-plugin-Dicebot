@@ -37,9 +37,8 @@ class Deck:
     This class represents a standard 54-card deck (with 2 different Jokers)
     and supports shuffling and drawing.
     """
-    titles = ['deuce', 'three', 'four', 'five', 'six', 'seven', 'eight',
-              'nine', 'ten', 'jack', 'queen', 'king', 'ace']
-    suits = ['clubs', 'diamonds', 'hearts', 'spades']
+    titles = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+    suits = ['♣', '♦', '♥', '♠']
 
     def __init__(self):
         """
@@ -57,8 +56,9 @@ class Deck:
 
         All cards are returned to the deck and then shuffled randomly.
         """
-        self.deck = self.base_deck[:]
-        random.shuffle(self.deck)
+        new_deck = self.base_deck[:]
+        random.shuffle(new_deck)
+        self.deck = new_deck
 
     def __next__(self):
         """
