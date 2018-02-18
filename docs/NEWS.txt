@@ -1,3 +1,7 @@
+1.0
+~~~
+- Port to Python 3.
+
 0.6
 ~~~
 - Extended tests for Shadowrun.
