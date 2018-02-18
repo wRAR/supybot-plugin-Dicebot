@@ -52,6 +52,7 @@ class Dicebot(callbacks.Plugin):
     rollRe7Sea     = re.compile(r'((?P<count>\d+)#)?(?P<prefix>[-+])?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
     rollReWoD      = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
     rollReDH       = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
+    rollReWG       = re.compile(r'(?P<rolls>\d+)#wg$')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -118,6 +119,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollRe7Sea, self._parse7SeaRoll),
                 (self.rollReWoD, self._parseWoDRoll),
                 (self.rollReDH, self._parseDHRoll),
+                (self.rollReWG, self._parseWGRoll),
                 ]
         results = []
         for word in text.split():
@@ -368,6 +370,26 @@ class Dicebot(callbacks.Plugin):
         return '%s (%s vs %d)' % (', '.join([str(i) for i in results]),
                                   ', '.join([str(i) for i in rollResults]),
                                   threshold)
+
+    def _parseWGRoll(self, m):
+        """
+        Parse WH40K: Wrath & Glory roll (10#wg)
+        """
+        rolls = int(m.group('rolls') or 1)
+        if rolls < 1 or rolls > self.MAX_ROLLS:
+            return
+
+        L = self._rollMultiple(1, 6, rolls)
+        self.log.debug(format("%L", [str(i) for i in L]))
+        return self._processWGResults(L, rolls)
+
+    @staticmethod
+    def _processWGResults(results, pool):
+        icons = 2 * results.count(6) + results.count(5) + results.count(4)
+        isNonZero = icons > 0
+        if isNonZero:
+            iconsStr = format('%n', (icons, 'icon'))
+            return '(pool %d) %s' % (pool, iconsStr)
 
     def _autoRollEnabled(self, irc, channel):
         """

@@ -106,5 +106,8 @@ class DicebotTestCase(PluginTestCase):
         self.assertRegexp('dicebot roll vs(10+20-5)', r'-?\d+ \(\d+ vs 25\)')
         self.assertRegexp('dicebot roll 3vs(10+20)', r'-?\d+, -?\d+, -?\d+ \(\d+, \d+, \d+ vs 30\)')
 
+    def testWG(self):
+        self.assertRegexp('dicebot roll 10#wg', r'\(pool 10\) \d+ icons?')
+
 
 # vim:set shiftwidth=4 tabstop=8 expandtab textwidth=78:
