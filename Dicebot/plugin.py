@@ -49,7 +49,7 @@ class Dicebot(callbacks.Plugin):
     rollReSR       = re.compile(r'(?P<rolls>\d+)#sd$')
     rollReSRX      = re.compile(r'(?P<rolls>\d+)#sdx$')
     rollReSRE      = re.compile(r'(?P<pool>\d+),(?P<thr>\d+)#sde$')
-    rollRe7Sea     = re.compile(r'((?P<count>\d+)#)?(?P<prefix>-|\+)?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
+    rollRe7Sea     = re.compile(r'((?P<count>\d+)#)?(?P<prefix>[-+])?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
     rollReWoD      = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
     rollReDH       = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
 
@@ -92,7 +92,8 @@ class Dicebot(callbacks.Plugin):
         """
         return [self._roll(dice, sides, mod) for i in range(rolls)]
 
-    def _formatMod(self, mod):
+    @staticmethod
+    def _formatMod(mod):
         """
         Format a numeric modifier for printing expressions such as 1d20+3.
 
@@ -118,7 +119,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollReWoD, self._parseWoDRoll),
                 (self.rollReDH, self._parseDHRoll),
                 ]
-        results = [ ]
+        results = []
         for word in text.split():
             for expr, parser in checklist:
                 m = expr.match(word)
@@ -154,11 +155,11 @@ class Dicebot(callbacks.Plugin):
             sides = int(m.group('sides'))
             if dice > self.MAX_DICE or sides > self.MAX_SIDES or sides < self.MIN_SIDES:
                 return
-            if (m.group('sign') == '-'):
+            if m.group('sign') == '-':
                 sides *= -1
             totalDice[sides] = totalDice.get(sides, 0) + dice
 
-        if (len(totalDice) == 0):
+        if len(totalDice) == 0:
             return
 
         results = []
@@ -212,7 +213,8 @@ class Dicebot(callbacks.Plugin):
             reroll = rerolled.count(6)
         return self._processSRResults(L, rolls, True)
 
-    def _processSRResults(self, results, pool, isExploding=False):
+    @staticmethod
+    def _processSRResults(results, pool, isExploding=False):
         hits = results.count(6) + results.count(5)
         ones = results.count(1)
         isHit = hits > 0
@@ -308,7 +310,6 @@ class Dicebot(callbacks.Plugin):
         return '[%dk%d%s%s] %s' % (rolls, keep, self._formatMod(mod), explodeStr,
                                    '; '.join(results))
 
-
     def _parseWoDRoll(self, m):
         """
         Parse New World of Darkness roll (5w)
@@ -318,7 +319,7 @@ class Dicebot(callbacks.Plugin):
             return
         if m.group('explode') == '-':
             explode = 0
-        elif m.group('explode') != None and m.group('explode').isdigit():
+        elif m.group('explode') is not None and m.group('explode').isdigit():
             explode = int(m.group('explode'))
             if explode < 8 or explode > 10:
                 explode = 10

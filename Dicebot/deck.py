@@ -68,6 +68,6 @@ class Deck:
         shuffled.
         """
         card = self.deck.pop()
-        if (self.deck == []):
+        if not self.deck:
             self.shuffle()
         return card
