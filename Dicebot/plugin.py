@@ -72,7 +72,7 @@ class Dicebot(callbacks.Plugin):
         mod -- number added to the total result (optional);
         """
         res = int(mod)
-        for i in xrange(dice):
+        for i in range(dice):
             res += random.randrange(1, sides+1)
         return res
 
@@ -90,7 +90,7 @@ class Dicebot(callbacks.Plugin):
         rolls -- number of times dice are rolled;
         mod -- number added to the each total result (optional);
         """
-        return [self._roll(dice, sides, mod) for i in xrange(rolls)]
+        return [self._roll(dice, sides, mod) for i in range(rolls)]
 
     def _formatMod(self, mod):
         """
@@ -162,9 +162,9 @@ class Dicebot(callbacks.Plugin):
             return
 
         results = []
-        for _ in xrange(rolls):
+        for _ in range(rolls):
             result = totalMod
-            for sides, dice in totalDice.iteritems():
+            for sides, dice in totalDice.items():
                 if sides > 0:
                     result += self._roll(dice, sides)
                 else:
@@ -173,7 +173,7 @@ class Dicebot(callbacks.Plugin):
 
         specFormatted = ''
         self.log.debug(repr(totalDice))
-        for sides, dice in sorted(totalDice.items(), key=itemgetter(0), reverse=True):
+        for sides, dice in sorted(list(totalDice.items()), key=itemgetter(0), reverse=True):
             if sides > 0:
                 if len(specFormatted) > 0:
                     specFormatted += '+'
@@ -288,10 +288,10 @@ class Dicebot(callbacks.Plugin):
         unkept = (prefix == '+' or k == 'kk') and keep < rolls
         explodeStr = ', not exploding' if not explode else ''
         results = []
-        for _ in xrange(count):
+        for _ in range(count):
             L = self._rollMultiple(1, 10, rolls)
             if explode:
-                for i in xrange(len(L)):
+                for i in range(len(L)):
                     if L[i] == 10:
                         while True:
                             rerolled = self._roll(1, 10)
@@ -328,7 +328,7 @@ class Dicebot(callbacks.Plugin):
         self.log.debug(format("%L", [str(i) for i in L]))
         successes = len([x for x in L if x >= 8])
         if explode:
-            for i in xrange(len(L)):
+            for i in range(len(L)):
                 if L[i] >= explode:
                     while True:
                         rerolled = self._roll(1, 10)
@@ -404,7 +404,7 @@ class Dicebot(callbacks.Plugin):
 
         Draws <count> cards (1 if omitted) from the deck and shows them.
         """
-        cards = [self.deck.next() for i in xrange(count)]
+        cards = [next(self.deck) for i in range(count)]
         irc.reply(', '.join(cards))
     draw = wrap(draw, [additional('positiveInt', 1)])
     deal = draw

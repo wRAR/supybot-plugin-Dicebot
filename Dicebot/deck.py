@@ -40,14 +40,15 @@ class Deck:
     titles = ['deuce', 'three', 'four', 'five', 'six', 'seven', 'eight',
               'nine', 'ten', 'jack', 'queen', 'king', 'ace']
     suits = ['clubs', 'diamonds', 'hearts', 'spades']
-    base_deck = ['Black Joker', 'Red Joker'] + [t + ' of ' + s
-                                                for t in titles for s in suits]
 
     def __init__(self):
         """
         Initialize a new deck and shuffle it.
         """
         self.deck = []
+        self.base_deck = ['Black Joker', 'Red Joker'] + [t + ' of ' + s
+                                                         for t in self.titles
+                                                         for s in self.suits]
         self.shuffle()
 
     def shuffle(self):
@@ -59,7 +60,7 @@ class Deck:
         self.deck = self.base_deck[:]
         random.shuffle(self.deck)
 
-    def next(self):
+    def __next__(self):
         """
         Draw the top card from the deck and return it.
 
