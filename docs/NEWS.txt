@@ -1,3 +1,8 @@
+0.6
+~~~
+- Extended tests for Shadowrun.
+- Support any number of dice and modifiers in the standard roll.
+
 0.5
 ~~~
 - Dark Heresy support added.
