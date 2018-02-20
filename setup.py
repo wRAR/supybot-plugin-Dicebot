@@ -6,13 +6,8 @@ plugins = [
 
 import sys
 
-if sys.version_info < (2, 3, 0):
-    sys.stderr.write("Supybot requires Python 2.3 or newer.\n")
-    sys.exit(-1)
-
-if sys.version_info < (2, 5, 0):
-    sys.stderr.write("Dicebot requires Python 2.5 or newer. You can backport"
-            "it to 2.3 if you need that.\n")
+if sys.version_info < (3, 0, 0):
+    sys.stderr.write("Supybot requires Python 3.\n")
     sys.exit(-1)
 
 import os.path
@@ -45,7 +40,6 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Topic :: Communications :: Chat :: Internet Relay Chat',
         'Topic :: Games/Entertainment :: Board Games',
