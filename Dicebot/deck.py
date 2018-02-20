@@ -45,7 +45,7 @@ class Deck:
         Initialize a new deck and shuffle it.
         """
         self.deck = []
-        self.base_deck = ['Black Joker', 'Red Joker'] + [t + ' of ' + s
+        self.base_deck = ['Black Joker', 'Red Joker'] + [t + s
                                                          for t in self.titles
                                                          for s in self.suits]
         self.shuffle()

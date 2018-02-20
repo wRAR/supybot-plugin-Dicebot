@@ -90,9 +90,11 @@ class DicebotTestCase(PluginTestCase):
         self.assertRegexp('dicebot roll 3#3k2', r'\[3k2\] \(\d+\) \d+, \d+(; \(\d+\) \d+, \d+){2}')
 
     def testDeck(self):
-        self.assertRegexp('dicebot draw', r'\w+ of \w+|\w+ Joker')
+        validator = r'(2|3|4|5|6|7|8|9|10|J|Q|K|A)(♣|♦|♥|♠)|(Black|Red) Joker'
+        self.assertRegexp('dicebot draw', validator)
         self.assertResponse('dicebot shuffle', 'shuffled')
-        self.assertRegexp('dicebot draw', r'\w+ of \w+|\w+ Joker')
+        for i in range(0, 54):
+            self.assertRegexp('dicebot draw', validator)
 
     def testWoD(self):
         self.assertRegexp('dicebot roll 3w', r'\(3\) (\d success(es)?|FAIL)')
