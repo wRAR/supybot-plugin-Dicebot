@@ -8,3 +8,5 @@ test-logs
 tmp
 *.pyc
 *.pyo
+.venv
+
