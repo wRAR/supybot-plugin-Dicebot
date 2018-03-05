@@ -30,7 +30,7 @@
 
 import random
 import pytest
-from .sevenSea2EdRaiseAssembler import Raise, RollResult
+from .sevenSea2EdRaiseRoller import Raise, RollResult
 
 class TestRaise:
     def test_str_no_raises(self):
@@ -39,7 +39,7 @@ class TestRaise:
 
     def test_str_some_raises(self):
         x = Raise(2, rolls=[10, 5])
-        assert str(x) == "** (10 + 5)"
+        assert str(x) == "**(10 + 5)"
 
     def test_str_no_raises_complex_roll(self):
         x = Raise(rolls=[RollResult(1, lash_count=5)])
@@ -47,4 +47,4 @@ class TestRaise:
 
     def test_str_some_raises_complex_roll(self):
         x = Raise(2, rolls=[10, RollResult(1, joie_de_vivre_target=5)])
-        assert str(x) == "** (10 + 10 [1])"
+        assert str(x) == "**(10 + 10 [1])"

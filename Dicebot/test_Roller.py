@@ -30,29 +30,38 @@
 
 import random
 import pytest
-from .sevenSea2EdRaiseAssembler import Raise, RollResult, SevenSea2EdRaiseAssembler
+from .sevenSea2EdRaiseRoller import Raise, RollResult, SevenSea2EdRaiseRoller
 
 class TestAssembler:
-    def _roll(self, roller, count):
-        return roller.roll(count)
+    def test_zero_dice(self):
+        x = SevenSea2EdRaiseRoller(lambda x: range(1, x+1)).roll_and_count(0)
+        assert len(x.raises) == 0
+        assert len(x.unused) == 0
+        assert str(x) == "0 raises"
+
+    def test_zero_raises_one_dice(self):
+        x = SevenSea2EdRaiseRoller(lambda x: range(1, x+1)).roll_and_count(1)
+        assert len(x.raises) == 0
+        assert len(x.unused) == 1
+        assert str(x) == "0 raises, unused: 1"
 
     def test_green(self):
-        x = SevenSea2EdRaiseAssembler(lambda x: range(1, x+1)).roll_and_count(4)
+        x = SevenSea2EdRaiseRoller(lambda x: range(1, x+1)).roll_and_count(4)
         assert len(x.raises) == 1
         assert len(x.unused) == 0
         assert str(x) == "1 raise: *(4 + 3 + 2 + 1)"
 
     def test_explode(self):
-        rolls = SevenSea2EdRaiseAssembler(ExplodingRoller().roll).roll(1)
+        rolls = SevenSea2EdRaiseRoller(ExplodingRoller().roll).roll(1)
         assert rolls == [10]
 
-        rolls = SevenSea2EdRaiseAssembler(ExplodingRoller().roll, explode=True).roll(1)
+        rolls = SevenSea2EdRaiseRoller(ExplodingRoller().roll, explode=True).roll(1)
         assert rolls == [10, 5]
 
-        rolls = SevenSea2EdRaiseAssembler(ExplodingRoller(3).roll, explode=True).roll(1)
+        rolls = SevenSea2EdRaiseRoller(ExplodingRoller(3).roll, explode=True).roll(1)
         assert rolls == [10, 10, 10, 5]
 
-        rolls = SevenSea2EdRaiseAssembler(ExplodingRoller(3).roll, explode=True).roll(3)
+        rolls = SevenSea2EdRaiseRoller(ExplodingRoller(3).roll, explode=True).roll(3)
         assert rolls == [10, 10, 10, 5, 10, 10, 10, 5, 10, 10, 10, 5]
 
 class Roller:

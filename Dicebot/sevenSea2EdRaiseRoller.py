@@ -67,7 +67,7 @@ class RaiseRollResult:
 
     def __str__(self):
         total_raises = sum(x.raise_count for x in self.raises)
-        result = "%d %s: %s" % (
+        result = "0 raises" if total_raises == 0 else "%d %s: %s" % (
             total_raises,
             "raises" if total_raises != 1 else "raise",
             "; ".join(map(str, self.raises))
@@ -76,9 +76,9 @@ class RaiseRollResult:
         if not self.unused:
             return result
 
-        return "%s, unused: %s" %(
+        return "%s, unused: %s" % (
             result,
-            map(str, self.unused)
+            ",".join(map(str, self.unused))
         )
 
 class RaiseAggregator:
@@ -133,9 +133,9 @@ class RaiseAggregator:
 
         return Raise(raise_count, raise_candidate)
 
-class SevenSea2EdRaiseAssembler:
+class SevenSea2EdRaiseRoller:
     """
-    Raise assembler for 7sea, 2ed. Spec: https://redd.it/80l7jm
+    Raise roller for 7sea, 2ed. Spec: https://redd.it/80l7jm
     """
 
     def __init__(self, roller, raise_target=10, raises_per_target=1, explode=False, lash_count=0, skill_rank=0, joie_de_vivre=False):

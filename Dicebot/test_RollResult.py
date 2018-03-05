@@ -30,7 +30,7 @@
 
 import random
 import pytest
-from .sevenSea2EdRaiseAssembler import RollResult
+from .sevenSea2EdRaiseRoller import RollResult
 
 class TestRollResult:
     def test_default(self):

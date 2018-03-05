@@ -13,3 +13,4 @@ tmp
 conf
 logs
 .vscode/settings.json
+.bot_test
