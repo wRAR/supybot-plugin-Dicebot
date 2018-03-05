@@ -70,7 +70,7 @@ class RaiseRollResult:
         result = "0 raises" if total_raises == 0 else "%d %s: %s" % (
             total_raises,
             "raises" if total_raises != 1 else "raise",
-            "; ".join(map(str, self.raises))
+            ", ".join(map(str, self.raises))
         )
 
         if not self.unused:
@@ -78,7 +78,7 @@ class RaiseRollResult:
 
         return "%s, unused: %s" % (
             result,
-            ",".join(map(str, self.unused))
+            ", ".join(map(str, self.unused))
         )
 
 class RaiseAggregator:
@@ -86,17 +86,17 @@ class RaiseAggregator:
         self.raise_target = raise_target
         self.raises_per_target = raises_per_target
         self.ten_is_still_raise = self.raise_target == 10 or self.raises_per_target != 1
+        self.exhausted = False
 
+        self.rolled_dices = defaultdict(list)
         self.dices = defaultdict(list)
         self.max_roll = 0
         for x in rolls:
             result = RollResult(x, lash_count, joie_de_vivre_target)
             self.dices[result.value].append(result)
+            self.rolled_dices[result.value].append(result)
             if result.value > self.max_roll:
                 self.max_roll = result.value
-
-        self.rolled_dices = self.dices
-        self.exhausted = False
 
     def get_dice(self, max):
         for x in range(max, 0, -1):
@@ -106,7 +106,10 @@ class RaiseAggregator:
         return None
 
     def __iter__(self):
-        self.dices = self.rolled_dices
+        self.dices = defaultdict(list)
+        for value in self.rolled_dices:
+            for roll in self.rolled_dices[value]:
+                self.dices[value].append(roll)
         self.exhausted = False
         return self
 
@@ -121,6 +124,8 @@ class RaiseAggregator:
             next_dice = self.get_dice(self.raise_target - raise_sum)
             if next_dice is not None:
                 raise_candidate.append(next_dice)
+                if raise_sum + next_dice.value >= self.raise_target:
+                    break
             else:
                 if self.ten_is_still_raise and raise_sum >= 10:
                     raise_count = 1

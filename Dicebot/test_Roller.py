@@ -64,6 +64,13 @@ class TestAssembler:
         rolls = SevenSea2EdRaiseRoller(ExplodingRoller(3).roll, explode=True).roll(3)
         assert rolls == [10, 10, 10, 5, 10, 10, 10, 5, 10, 10, 10, 5]
 
+    def test_big_skill(self):
+        rolls = SevenSea2EdRaiseRoller(
+            lambda x: [8, 6, 1, 8, 5, 2, 4],
+            skill_rank=7
+        ).roll_and_count(7)
+        assert str(rolls) == "4 raises: **(8 + 6 + 1), **(8 + 5 + 2), unused: 4"
+
 class Roller:
     def roll(self, count):
         return [next(self) for _ in range(count)]
