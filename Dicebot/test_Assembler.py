@@ -36,24 +36,24 @@ class TestAssembler:
     def _roll(self, roller, count):
         return roller.roll(count)
 
-    # def test_green(self):
-    #     x = SevenSea2EdRaiseAssembler(lambda x: 10).roll(1)
-    #     assert len(x.raises) == 1
-    #     assert len(x.unused) == 0
-    #     assert str(x) == "1 raise: *10"
+    def test_green(self):
+        x = SevenSea2EdRaiseAssembler(lambda x: range(1, x+1)).roll_and_count(4)
+        assert len(x.raises) == 1
+        assert len(x.unused) == 0
+        assert str(x) == "1 raise: *(4 + 3 + 2 + 1)"
 
     def test_explode(self):
         rolls = SevenSea2EdRaiseAssembler(ExplodingRoller().roll).roll(1)
-        assert [x.result for x in rolls] == [10]
+        assert rolls == [10]
 
         rolls = SevenSea2EdRaiseAssembler(ExplodingRoller().roll, explode=True).roll(1)
-        assert [x.result for x in rolls] == [10, 5]
+        assert rolls == [10, 5]
 
         rolls = SevenSea2EdRaiseAssembler(ExplodingRoller(3).roll, explode=True).roll(1)
-        assert [x.result for x in rolls] == [10, 10, 10, 5]
+        assert rolls == [10, 10, 10, 5]
 
         rolls = SevenSea2EdRaiseAssembler(ExplodingRoller(3).roll, explode=True).roll(3)
-        assert [x.result for x in rolls] == [10, 10, 10, 5, 10, 10, 10, 5, 10, 10, 10, 5]
+        assert rolls == [10, 10, 10, 5, 10, 10, 10, 5, 10, 10, 10, 5]
 
 class Roller:
     def roll(self, count):
