@@ -33,8 +33,9 @@ import pytest
 from collections import defaultdict
 
 class RollResult:
-    def __init__(self, result, lash_count=0, joie_de_vivre_target=0):
+    def __init__(self, result, lash_count=0, joie_de_vivre_target=0, explode_level=0):
         self.result = result
+        self.explode_level = explode_level
         if result < lash_count:
             self.value = 0
         elif result <= joie_de_vivre_target:
@@ -43,16 +44,15 @@ class RollResult:
             self.value = result
 
     def __str__(self):
-        return "%d" % (self.result) if self.result == self.value else "%d [%d]" % (self.value, self.result)
+        if self.result == self.value:
+            return "%d%s" % (self.result, "x" * self.explode_level)
+        else:
+            return "%d%s [%d]" % (self.value, "x" * self.explode_level, self.result)
 
 class Raise:
     def __init__(self, raise_count=0, rolls=[]):
         self.rolls = list(map(lambda x: x if isinstance(x, RollResult) else RollResult(x), rolls))
         self.raise_count = raise_count
-
-    @property
-    def Sum(self):
-        return sum(map(lambda x: x.value, self.rolls))
 
     def __str__(self):
         if self.raise_count == 0:
@@ -92,10 +92,9 @@ class RaiseAggregator:
         self.dices = defaultdict(list)
         self.max_roll = 0
         for x in rolls:
-            result = RollResult(x, lash_count, joie_de_vivre_target)
-            self.rolled_dices[result.value].append(result)
-            if result.value > self.max_roll:
-                self.max_roll = result.value
+            self.rolled_dices[x.value].append(x)
+            if x.value > self.max_roll:
+                self.max_roll = x.value
 
     def get_dice(self, max):
         for x in range(max, 0, -1):
@@ -149,6 +148,8 @@ class SevenSea2EdRaiseRoller:
     def __init__(self, roller, raise_target=10, raises_per_target=1, explode=False, lash_count=0, skill_rank=0, joie_de_vivre=False):
         self.roller = roller
         self.explode = skill_rank >= 5 or explode
+        self.lash_count = lash_count
+        self.joie_de_vivre_target = skill_rank if joie_de_vivre else 0
         default_roll = raise_target == 10 and raises_per_target == 1
         self.aggregator_template = lambda x: RaiseAggregator(
             15 if skill_rank >= 4 and default_roll else raise_target,
@@ -171,10 +172,10 @@ class SevenSea2EdRaiseRoller:
 
         return RaiseRollResult(raises, sorted(unused, key=lambda x: x.value, reverse=True))
 
-    def roll(self, dice_count):
+    def roll(self, dice_count, explode_level=0):
         if dice_count == 0:
             return []
 
-        rolls = self.roller(dice_count)
+        rolls = [RollResult(x, self.lash_count, self.joie_de_vivre_target, explode_level) for x in self.roller(dice_count)]
 
-        return rolls + self.roll(len([x for x in rolls if x == 10])) if self.explode else rolls
+        return rolls + self.roll(len([x for x in rolls if x.result == 10]), explode_level + 1) if self.explode else rolls

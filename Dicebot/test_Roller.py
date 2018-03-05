@@ -32,7 +32,7 @@ import random
 import pytest
 from .sevenSea2EdRaiseRoller import Raise, RollResult, SevenSea2EdRaiseRoller
 
-class TestAssembler:
+class TestRoller:
     def test_zero_dice(self):
         x = SevenSea2EdRaiseRoller(lambda x: range(1, x+1)).roll_and_count(0)
         assert len(x.raises) == 0
@@ -53,16 +53,16 @@ class TestAssembler:
 
     def test_explode(self):
         rolls = SevenSea2EdRaiseRoller(ExplodingRoller().roll).roll(1)
-        assert rolls == [10]
+        assert ', '.join(map(str, rolls)) == "10"
 
         rolls = SevenSea2EdRaiseRoller(ExplodingRoller().roll, explode=True).roll(1)
-        assert rolls == [10, 5]
+        assert ', '.join(map(str, rolls)) == "10, 5x"
 
         rolls = SevenSea2EdRaiseRoller(ExplodingRoller(3).roll, explode=True).roll(1)
-        assert rolls == [10, 10, 10, 5]
+        assert ', '.join(map(str, rolls)) == "10, 10x, 10xx, 5xxx"
 
         rolls = SevenSea2EdRaiseRoller(ExplodingRoller(3).roll, explode=True).roll(3)
-        assert rolls == [10, 10, 10, 5, 10, 10, 10, 5, 10, 10, 10, 5]
+        assert ', '.join(map(str, rolls)) == "10, 10, 10, 5x, 10x, 10x, 10xx, 5xx, 10xxx, 10xxxx, 10xxxxx, 5xxxxxx"
 
     def test_big_skill(self):
         rolls = SevenSea2EdRaiseRoller(
