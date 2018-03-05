@@ -290,8 +290,16 @@ class Dicebot(callbacks.Plugin):
         vivre = m.group('vivre') == '-'
         explode = m.group('explode') == 'ex'
         lashes = 0 if m.group('lashes') is None else int(m.group('lashes'))
+        self.log.debug(format('7sea2ed: %i (%s) dices at %i skill. lashes = %i. explode is %s. vivre is %s',
+            roll_count,
+            str(rolls),
+            skill,
+            lashes,
+            "enabled" if explode else "disabled",
+            "enabled" if vivre else "disabled"
+        ))
         roller = SevenSea2EdRaiseRoller(
-            lambda x: self._rollMultiple(x, 10),
+            lambda x: self._rollMultiple(1, 10, x),
             skill_rank=skill,
             explode=explode,
             lash_count=lashes,
