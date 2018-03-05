@@ -61,9 +61,10 @@ class Raise:
             return "%s(%s)" % ("*" * self.raise_count, " + ".join(map(str, self.rolls)))
 
 class RaiseRollResult:
-    def __init__(self, raises=[], unused=[]):
+    def __init__(self, raises=[], unused=[], discarded=None):
         self.raises = raises
         self.unused = unused
+        self.discarded = discarded
 
     def __str__(self):
         total_raises = sum(x.raise_count for x in self.raises)
@@ -73,13 +74,19 @@ class RaiseRollResult:
             ", ".join(map(str, self.raises))
         )
 
-        if not self.unused:
-            return result
+        if self.unused:
+            result = "%s, unused: %s" % (
+                result,
+                ", ".join(map(str, self.unused))
+            )
 
-        return "%s, unused: %s" % (
-            result,
-            ", ".join(map(str, self.unused))
-        )
+        if self.discarded:
+            result = "%s, discarded: %s" % (
+                result,
+                ", ".join(map(str, self.discarded))
+            )
+
+        return result
 
 class RaiseAggregator:
     def __init__(self, raise_target, raises_per_target, lash_count, joie_de_vivre_target, rolls):
@@ -150,6 +157,7 @@ class SevenSea2EdRaiseRoller:
         self.explode = skill_rank >= 5 or explode
         self.lash_count = lash_count
         self.joie_de_vivre_target = skill_rank if joie_de_vivre else 0
+        self.reroll_one_dice = skill_rank >= 3
         default_roll = raise_target == 10 and raises_per_target == 1
         self.aggregator_template = lambda x: RaiseAggregator(
             15 if skill_rank >= 4 and default_roll else raise_target,
@@ -163,14 +171,27 @@ class SevenSea2EdRaiseRoller:
         """
         Assemble raises, according to spec
         """
-        aggregator = self.aggregator_template(self.roll(dice_count))
+        rolls = self.roll(dice_count)
+        if not self.reroll_one_dice:
+            discarded_dice = None
+        else:
+            reroll = self.roll(1)
+            min_value_dice = min(rolls, key=lambda x: x.value)
+            if min_value_dice.value < sum(x.value for x in reroll):
+                rolls.remove(min_value_dice)
+                rolls += reroll
+                discarded_dice = [min_value_dice]
+            else:
+                discarded_dice = reroll
+
+        aggregator = self.aggregator_template(rolls)
         raises = list(aggregator)
         unused = []
         for value in aggregator.dices:
             for dice in aggregator.dices[value]:
                 unused.append(dice)
 
-        return RaiseRollResult(raises, sorted(unused, key=lambda x: x.value, reverse=True))
+        return RaiseRollResult(raises, sorted(unused, key=lambda x: x.value, reverse=True), discarded_dice)
 
     def roll(self, dice_count, explode_level=0):
         if dice_count == 0:

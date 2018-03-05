@@ -66,21 +66,32 @@ class TestRoller:
 
     def test_big_skill(self):
         rolls = SevenSea2EdRaiseRoller(
-            lambda x: [8, 6, 1, 8, 5, 2, 4],
+            RerollRoller([8, 6, 1, 8, 5, 2, 4]).roll,
             skill_rank=7
         ).roll_and_count(7)
-        assert str(rolls) == "4 raises: **(8 + 6 + 1), **(8 + 5 + 2), unused: 4"
+        assert str(rolls) == "4 raises: **(8 + 6 + 1), **(8 + 5 + 2), unused: 4, discarded: 1"
 
     def test_nines_without_ones(self):
         rolls = SevenSea2EdRaiseRoller(
-            lambda x: [10, 9, 9, 9, 8, 7, 6, 2],
+            RerollRoller([10, 9, 9, 9, 8, 7, 6, 2]).roll,
             skill_rank=3
         ).roll_and_count(8)
-        assert str(rolls) == "4 raises: *(10), *(9 + 2), *(9 + 6), *(9 + 7), unused: 8"
+        assert str(rolls) == "4 raises: *(10), *(9 + 2), *(9 + 6), *(9 + 7), unused: 8, discarded: 1"
 
 class Roller:
     def roll(self, count):
         return [next(self) for _ in range(count)]
+
+class RerollRoller(Roller):
+    def __init__(self, result, reroll_result=[1]):
+        self.result = result + reroll_result
+        self.index = 0
+
+    def __next__(self):
+        self.index %= len(self.result)
+        value = self.result[self.index]
+        self.index += 1
+        return value
 
 class ExplodingRoller(Roller):
     def __init__(self, ten_count=1, default_value=5):
