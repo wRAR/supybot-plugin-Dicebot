@@ -93,7 +93,6 @@ class RaiseAggregator:
         self.max_roll = 0
         for x in rolls:
             result = RollResult(x, lash_count, joie_de_vivre_target)
-            self.dices[result.value].append(result)
             self.rolled_dices[result.value].append(result)
             if result.value > self.max_roll:
                 self.max_roll = result.value
