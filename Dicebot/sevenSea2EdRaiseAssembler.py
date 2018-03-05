@@ -45,16 +45,19 @@ class RollResult:
         return "%d" % (self.result) if self.result == self.value else "%d [%d]" % (self.value, self.result)
 
 class Raise:
-    def __init__(self, rolls, raise_count):
-        self.rolls = rolls
+    def __init__(self, raise_count=0, rolls=[]):
+        self.rolls = map(lambda x: x if isinstance(x, RollResult) else RollResult(x), rolls)
         self.raise_count = raise_count
 
     @property
     def Sum(self):
         return sum(map(lambda x: x.value, self.rolls))
-    
+
     def __str__(self):
-        return "%s%s" % ("*" * self.raise_count, " + ".join(self.rolls))
+        if self.raise_count == 0:
+            return "(%s)" % (" + ".join(map(str, self.rolls)))
+        else:
+            return "%s (%s)" % ("*" * self.raise_count, " + ".join(map(str, self.rolls)))
 
 class SevenSea2EdRaiseAssembler:
     """
@@ -77,7 +80,7 @@ class SevenSea2EdRaiseAssembler:
         self.skill_rank = rank
         if rank >= 4:
             self.raise_target = 15
-            self.raises_per_target = 1
+            self.raises_per_target = 2
         if rank >= 5:
             self.explode = True
         return self
@@ -85,16 +88,17 @@ class SevenSea2EdRaiseAssembler:
     def with_lashes(self, count):
         self.discard_target = count
         return self
-    
+
     def with_joie_de_vivre(self):
         self.joie_de_vivre = True
         return self
 
     def with_explode(self):
         self.explode = True
+        return self
 
     def assemble(self):
         """
         Assemble raises, according to spec
         """
-        
+
