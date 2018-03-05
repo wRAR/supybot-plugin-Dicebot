@@ -51,7 +51,7 @@ class Dicebot(callbacks.Plugin):
     rollReSRX         = re.compile(r'(?P<rolls>\d+)#sdx$')
     rollReSRE         = re.compile(r'(?P<pool>\d+),(?P<thr>\d+)#sde$')
     rollRe7Sea        = re.compile(r'((?P<count>\d+)#)?(?P<prefix>[-+])?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
-    rollRe7Sea2ed     = re.compile(r'(?P<rolls>([-+]|\d)+)s(?P<skill>\d)(?P<vivre>-)?(l(?P<lashes>\d+))?(?P<explode>ex)?$')
+    rollRe7Sea2ed     = re.compile(r'(?P<rolls>([-+]|\d)+)s(?P<skill>\d)(?P<vivre>-)?(l(?P<lashes>\d+))?(?P<explode>ex)?(?P<cursed>r15)?$')
     rollReWoD         = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
     rollReDH          = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
     rollReWG          = re.compile(r'(?P<rolls>\d+)#wg$')
@@ -290,6 +290,7 @@ class Dicebot(callbacks.Plugin):
         vivre = m.group('vivre') == '-'
         explode = m.group('explode') == 'ex'
         lashes = 0 if m.group('lashes') is None else int(m.group('lashes'))
+        cursed = m.group('cursed') is not None
         self.log.debug(format('7sea2ed: %i (%s) dices at %i skill. lashes = %i. explode is %s. vivre is %s',
             roll_count,
             str(rolls),
@@ -303,7 +304,8 @@ class Dicebot(callbacks.Plugin):
             skill_rank=skill,
             explode=explode,
             lash_count=lashes,
-            joie_de_vivre=vivre)
+            joie_de_vivre=vivre,
+            raise_target=15 if cursed else 10)
 
         return str(roller.roll_and_count(roll_count))
 

@@ -149,9 +149,10 @@ class SevenSea2EdRaiseRoller:
     def __init__(self, roller, raise_target=10, raises_per_target=1, explode=False, lash_count=0, skill_rank=0, joie_de_vivre=False):
         self.roller = roller
         self.explode = skill_rank >= 5 or explode
+        default_roll = raise_target == 10 and raises_per_target == 1
         self.aggregator_template = lambda x: RaiseAggregator(
-            15 if skill_rank >= 4 else raise_target,
-            2 if skill_rank >= 4 else raises_per_target,
+            15 if skill_rank >= 4 and default_roll else raise_target,
+            2 if skill_rank >= 4 and default_roll else raises_per_target,
             lash_count,
             skill_rank if joie_de_vivre else 0,
             x
