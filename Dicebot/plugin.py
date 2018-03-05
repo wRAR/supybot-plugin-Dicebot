@@ -73,7 +73,7 @@ class Dicebot(callbacks.Plugin):
         mod -- number added to the total result (optional);
         """
         res = int(mod)
-        for i in range(dice):
+        for _ in range(dice):
             res += random.randrange(1, sides+1)
         return res
 

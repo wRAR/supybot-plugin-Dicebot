@@ -59,46 +59,65 @@ class Raise:
         else:
             return "%s (%s)" % ("*" * self.raise_count, " + ".join(map(str, self.rolls)))
 
+class Result:
+    def __init__(self, raises=[], unused=[]):
+        self.raises = raises
+        self.unused = unused
+
+    def __str__(self):
+        total_raises = sum(map(lambda x: x.raise_count, self.raises))
+        result = "%d %s: %s" % (
+            total_raises,
+            "raises" if total_raises != 1 else "raise",
+            "; ".join(map(str, self.raises))
+        )
+
+        if not self.unused:
+            return result
+
+        return "%s, unused: %s" %(
+            result,
+            map(str, self.unused)
+        )
+
 class SevenSea2EdRaiseAssembler:
     """
     Raise assembler for 7sea, 2ed. Spec: https://redd.it/80l7jm
     """
 
-    def __init__(self, roller):
+    def __init__(self, roller, raise_target=10, raises_per_target=1, explode=False, lash_count=0, skill_rank=0, joie_de_vivre=False):
         self.roller = roller
-        self.raise_target = 10
-        self.raises_per_target = 1
-        self.explode = False
-        self.discard_target = 0
-        self.joie_de_vivre = False
+        self.raise_target = raise_target
+        self.raises_per_target = raises_per_target
+        self.explode = explode
+        self.lash_count = lash_count
+        self.skill_rank = skill_rank
+        self.joie_de_vivre_target = self.skill_rank if joie_de_vivre else 0
 
-    def roll(self, dice_count):
-        self.dice_count = dice_count
-        return self
-
-    def with_skill(self, rank):
-        self.skill_rank = rank
-        if rank >= 4:
+        if skill_rank >= 4:
             self.raise_target = 15
             self.raises_per_target = 2
-        if rank >= 5:
+        if skill_rank >= 5:
             self.explode = True
-        return self
 
-    def with_lashes(self, count):
-        self.discard_target = count
-        return self
+        self.ten_is_still_raise = self.raise_target == 10 or self.raises_per_target != 1
+        self.breaker = 0
 
-    def with_joie_de_vivre(self):
-        self.joie_de_vivre = True
-        return self
-
-    def with_explode(self):
-        self.explode = True
-        return self
-
-    def assemble(self):
+    def roll_and_count(self, dice_count):
         """
         Assemble raises, according to spec
         """
+        dices = self.roll(dice_count)
+        return Result()
+
+    def roll(self, dice_count):
+        if dice_count == 0:
+            return []
+
+        if self.breaker == 10:
+            return []
+
+        rolls = [RollResult(x, self.lash_count, self.joie_de_vivre_target) for x in self.roller(dice_count)]
+        self.breaker += 1
+        return rolls + self.roll(len([x for x in rolls if x.result == 10])) if self.explode else rolls
 
