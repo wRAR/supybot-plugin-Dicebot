@@ -101,7 +101,6 @@ class SevenSea2EdRaiseAssembler:
             self.explode = True
 
         self.ten_is_still_raise = self.raise_target == 10 or self.raises_per_target != 1
-        self.breaker = 0
 
     def roll_and_count(self, dice_count):
         """
@@ -114,10 +113,6 @@ class SevenSea2EdRaiseAssembler:
         if dice_count == 0:
             return []
 
-        if self.breaker == 10:
-            return []
-
         rolls = [RollResult(x, self.lash_count, self.joie_de_vivre_target) for x in self.roller(dice_count)]
-        self.breaker += 1
-        return rolls + self.roll(len([x for x in rolls if x.result == 10])) if self.explode else rolls
 
+        return rolls + self.roll(len([x for x in rolls if x.result == 10])) if self.explode else rolls

@@ -52,6 +52,8 @@ class TestAssembler:
         rolls = SevenSea2EdRaiseAssembler(ExplodingRoller(3).roll, explode=True).roll(1)
         assert [x.result for x in rolls] == [10, 10, 10, 5]
 
+        rolls = SevenSea2EdRaiseAssembler(ExplodingRoller(3).roll, explode=True).roll(3)
+        assert [x.result for x in rolls] == [10, 10, 10, 5, 10, 10, 10, 5, 10, 10, 10, 5]
 
 class Roller:
     def roll(self, count):
