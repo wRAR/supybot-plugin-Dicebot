@@ -71,6 +71,13 @@ class TestAssembler:
         ).roll_and_count(7)
         assert str(rolls) == "4 raises: **(8 + 6 + 1), **(8 + 5 + 2), unused: 4"
 
+    def test_nines_without_ones(self):
+        rolls = SevenSea2EdRaiseRoller(
+            lambda x: [10, 9, 9, 9, 8, 7, 6, 2],
+            skill_rank=3
+        ).roll_and_count(8)
+        assert str(rolls) == "4 raises: *(10), *(9 + 2), *(9 + 6), *(9 + 7), unused: 8"
+
 class Roller:
     def roll(self, count):
         return [next(self) for _ in range(count)]

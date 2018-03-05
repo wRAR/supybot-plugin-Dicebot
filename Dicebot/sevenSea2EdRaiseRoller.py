@@ -102,6 +102,10 @@ class RaiseAggregator:
             if len(self.dices[x]) > 0:
                 return self.dices[x].pop()
 
+        for x in range(max + 1, self.max_roll+ 1):
+            if len(self.dices[x]) > 0:
+                return self.dices[x].pop()
+
         return None
 
     def __iter__(self):
@@ -158,7 +162,7 @@ class SevenSea2EdRaiseRoller:
         Assemble raises, according to spec
         """
         aggregator = self.aggregator_template(self.roll(dice_count))
-        raises = list(sorted(aggregator, key=lambda x: x.Sum, reverse=True))
+        raises = list(aggregator)
         unused = []
         for value in aggregator.dices:
             for dice in aggregator.dices[value]:
