@@ -78,6 +78,21 @@ class TestRoller:
         ).roll_and_count(8)
         assert str(rolls) == "4 raises: *(10), *(9 + 2), *(9 + 6), *(9 + 7), unused: 8, discarded: 1"
 
+    def test_discard_one_of_the_initial(self):
+        rolls = SevenSea2EdRaiseRoller(
+            RerollRoller([10, 9, 9, 9, 8, 7, 6, 2], [10, 5]).roll,
+            skill_rank=3
+        ).roll_and_count(8)
+        assert str(rolls) == "5 raises: *(10), *(10), *(9 + 6), *(9 + 7), *(9 + 8), discarded: 2"
+
+    def test_discard_one_of_the_initial_explode(self):
+        rolls = SevenSea2EdRaiseRoller(
+            RerollRoller([10, 9, 9, 9, 8, 7, 6, 2], [10, 5]).roll,
+            skill_rank=3,
+            explode=True
+        ).roll_and_count(7)
+        assert str(rolls) == "5 raises: *(10), *(10), *(9 + 5x), *(9 + 6), *(9 + 7), unused: 8, discarded: 2x"
+
 class Roller:
     def roll(self, count):
         return [next(self) for _ in range(count)]
