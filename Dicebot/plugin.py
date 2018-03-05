@@ -57,7 +57,7 @@ class Dicebot(callbacks.Plugin):
     rollReWG          = re.compile(r'(?P<rolls>\d+)#wg$')
 
     validationDH      = re.compile(r'^[+\-]?\d{1,4}([+\-]\d{1,4})*$')
-    validation7sea2ed = re.compile(r'^[+\-]?\d([+\-]\d)*$')
+    validation7sea2ed = re.compile(r'^[+\-]?\d{1,2}([+\-]\d{1,2})*$')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
