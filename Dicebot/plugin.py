@@ -28,6 +28,7 @@
 ###
 
 from .deck import Deck
+from .sevenSea2EdRaiseRoller import SevenSea2EdRaiseRoller
 
 from operator import itemgetter
 import re
@@ -45,14 +46,18 @@ class Dicebot(callbacks.Plugin):
     autoRollInPrivate option is enabled).
     """
 
-    rollReStandard = re.compile(r'((?P<rolls>\d+)#)?(?P<spec>[+-]?(\d*d\d+|\d+)([+-](\d*d\d+|\d+))*)$')
-    rollReSR       = re.compile(r'(?P<rolls>\d+)#sd$')
-    rollReSRX      = re.compile(r'(?P<rolls>\d+)#sdx$')
-    rollReSRE      = re.compile(r'(?P<pool>\d+),(?P<thr>\d+)#sde$')
-    rollRe7Sea     = re.compile(r'((?P<count>\d+)#)?(?P<prefix>[-+])?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
-    rollReWoD      = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
-    rollReDH       = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
-    rollReWG       = re.compile(r'(?P<rolls>\d+)#wg$')
+    rollReStandard    = re.compile(r'((?P<rolls>\d+)#)?(?P<spec>[+-]?(\d*d\d+|\d+)([+-](\d*d\d+|\d+))*)$')
+    rollReSR          = re.compile(r'(?P<rolls>\d+)#sd$')
+    rollReSRX         = re.compile(r'(?P<rolls>\d+)#sdx$')
+    rollReSRE         = re.compile(r'(?P<pool>\d+),(?P<thr>\d+)#sde$')
+    rollRe7Sea        = re.compile(r'((?P<count>\d+)#)?(?P<prefix>[-+])?(?P<rolls>\d+)(?P<k>k{1,2})(?P<keep>\d+)(?P<mod>[+-]\d+)?$')
+    rollRe7Sea2ed     = re.compile(r'(?P<rolls>([-+]|\d)+)s(?P<skill>\d)(?P<vivre>-)?(l(?P<lashes>\d+))?(?P<explode>ex)?(?P<cursed>r15)?$')
+    rollReWoD         = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
+    rollReDH          = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
+    rollReWG          = re.compile(r'(?P<rolls>\d+)#wg$')
+
+    validationDH      = re.compile(r'^[+\-]?\d{1,4}([+\-]\d{1,4})*$')
+    validation7sea2ed = re.compile(r'^[+\-]?\d{1,2}([+\-]\d{1,2})*$')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -73,7 +78,7 @@ class Dicebot(callbacks.Plugin):
         mod -- number added to the total result (optional);
         """
         res = int(mod)
-        for i in range(dice):
+        for _ in range(dice):
             res += random.randrange(1, sides+1)
         return res
 
@@ -117,6 +122,7 @@ class Dicebot(callbacks.Plugin):
                 (self.rollReSRX, self._parseShadowrunXRoll),
                 (self.rollReSRE, self._parseShadowrunExtRoll),
                 (self.rollRe7Sea, self._parse7SeaRoll),
+                (self.rollRe7Sea2ed, self._parse7Sea2edRoll),
                 (self.rollReWoD, self._parseWoDRoll),
                 (self.rollReDH, self._parseDHRoll),
                 (self.rollReWG, self._parseWGRoll),
@@ -266,6 +272,44 @@ class Dicebot(callbacks.Plugin):
             return format('(pool %i, threshold %i) critical glitch at %s pass%s, %n so far',
                           pool, threshold, ordinal(critGlitch), glitchStr, (result, 'hit'))
 
+    def _parse7Sea2edRoll(self, m):
+        """
+        Parse 7th Sea 2ed roll (4s2 is its simplest form). Full spec: https://redd.it/80l7jm
+        """
+        rolls = m.group('rolls')
+        if rolls is None:
+            return
+        # additional validation
+        if not re.match(self.validation7sea2ed, rolls):
+            return
+
+        roll_count = eval(rolls)
+        if roll_count < 1 or roll_count > self.MAX_ROLLS:
+            return
+        skill = int(m.group('skill'))
+        vivre = m.group('vivre') == '-'
+        explode = m.group('explode') == 'ex'
+        lashes = 0 if m.group('lashes') is None else int(m.group('lashes'))
+        cursed = m.group('cursed') is not None
+        self.log.debug(format('7sea2ed: %i (%s) dices at %i skill. lashes = %i. explode is %s. vivre is %s',
+            roll_count,
+            str(rolls),
+            skill,
+            lashes,
+            "enabled" if explode else "disabled",
+            "enabled" if vivre else "disabled"
+        ))
+        roller = SevenSea2EdRaiseRoller(
+            lambda x: self._rollMultiple(1, 10, x),
+            skill_rank=skill,
+            explode=explode,
+            lash_count=lashes,
+            joie_de_vivre=vivre,
+            raise_target=15 if cursed else 10)
+
+        return '[%s]: %s' % (m.group(0), str(roller.roll_and_count(roll_count)))
+
+
     def _parse7SeaRoll(self, m):
         """
         Parse 7th Sea-specific roll (4k2 is its simplest form).
@@ -361,7 +405,7 @@ class Dicebot(callbacks.Plugin):
 
         thresholdExpr = m.group('thr')
         # additional validation
-        if not re.match(r'^[+\-]?\d{1,4}([+\-]\d{1,4})*$', thresholdExpr):
+        if not re.match(self.validationDH, thresholdExpr):
             return
 
         threshold = eval(thresholdExpr)

@@ -9,4 +9,8 @@ tmp
 *.pyc
 *.pyo
 .venv
-
+.pytest_cache
+conf
+logs
+.vscode/settings.json
+.bot_test
