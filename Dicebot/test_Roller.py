@@ -69,21 +69,21 @@ class TestRoller:
             RerollRoller([8, 6, 1, 8, 5, 2, 4]).roll,
             skill_rank=7
         ).roll_and_count(7)
-        assert str(rolls) == "4 raises: **(8 + 6 + 1), **(8 + 5 + 2), unused: 4, discarded: 1"
+        assert str(rolls) == "4 raises: **(8 + 6 + 1), **(8 + 5 + 2), unused: 4, discarded: 1r"
 
     def test_nines_without_ones(self):
         rolls = SevenSea2EdRaiseRoller(
             RerollRoller([10, 9, 9, 9, 8, 7, 6, 2]).roll,
             skill_rank=3
         ).roll_and_count(8)
-        assert str(rolls) == "4 raises: *(10), *(9 + 2), *(9 + 6), *(9 + 7), unused: 8, discarded: 1"
+        assert str(rolls) == "4 raises: *(10), *(9 + 2), *(9 + 6), *(9 + 7), unused: 8, discarded: 1r"
 
     def test_discard_one_of_the_initial(self):
         rolls = SevenSea2EdRaiseRoller(
             RerollRoller([10, 9, 9, 9, 8, 7, 6, 2], [10, 5]).roll,
             skill_rank=3
         ).roll_and_count(8)
-        assert str(rolls) == "5 raises: *(10), *(10), *(9 + 6), *(9 + 7), *(9 + 8), discarded: 2"
+        assert str(rolls) == "5 raises: *(10r), *(10), *(9 + 6), *(9 + 7), *(9 + 8), discarded: 2"
 
     def test_discard_one_of_the_initial_explode(self):
         rolls = SevenSea2EdRaiseRoller(
@@ -91,21 +91,21 @@ class TestRoller:
             skill_rank=3,
             explode=True
         ).roll_and_count(7)
-        assert str(rolls) == "5 raises: *(10), *(10), *(9 + 5x), *(9 + 6), *(9 + 7), unused: 8, discarded: 2x"
+        assert str(rolls) == "5 raises: *(10r), *(10), *(9 + 5rx), *(9 + 6), *(9 + 7), unused: 8, discarded: 2x"
 
     def test_optimal_solution_is_one_step_up(self):
         rolls = SevenSea2EdRaiseRoller(
             RerollRoller([10, 10, 10, 10, 5, 5, 5, 4, 4, 7, 6]).roll,
             skill_rank=5
         ).roll_and_count(7)
-        assert str(rolls) == "10 raises: **(10 + 5), **(10 + 5), **(10 + 5), **(10 + 6x), **(7x + 4x + 4x), discarded: 1"
+        assert str(rolls) == "10 raises: **(10 + 5), **(10 + 5), **(10 + 5), **(10 + 6x), **(7x + 4x + 4x), discarded: 1r"
 
     def test_optimal_solution_is_one_step_up2(self):
         rolls = SevenSea2EdRaiseRoller(
             RerollRoller([10, 5, 10, 5, 6, 4, 3, 4, 3], [2]).roll,
             skill_rank=5
         ).roll_and_count(7)
-        assert str(rolls) == "6 raises: **(10 + 5), **(10 + 5), **(6 + 4x + 4 + 3x), unused: 3, discarded: 2"
+        assert str(rolls) == "6 raises: **(10 + 5), **(10 + 5), **(6 + 4x + 4 + 3x), unused: 3, discarded: 2r"
 
     # will wait boosting trees
     # def test_optimal_solution_is_one_step_up3(self):

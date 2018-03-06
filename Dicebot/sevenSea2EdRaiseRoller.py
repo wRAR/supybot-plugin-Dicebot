@@ -33,9 +33,9 @@ import pytest
 from collections import defaultdict
 
 class RollResult:
-    def __init__(self, result, lash_count=0, joie_de_vivre_target=0, explode_level=0):
+    def __init__(self, result, lash_count=0, joie_de_vivre_target=0, suffix=''):
         self.result = result
-        self.explode_level = explode_level
+        self.suffix = suffix
         if result < lash_count:
             self.value = 0
         elif result <= joie_de_vivre_target:
@@ -45,9 +45,9 @@ class RollResult:
 
     def __str__(self):
         if self.result == self.value:
-            return "%d%s" % (self.result, "x" * self.explode_level)
+            return "%d%s" % (self.result, self.suffix)
         else:
-            return "%d%s [%d]" % (self.value, "x" * self.explode_level, self.result)
+            return "%d%s [%d]" % (self.value, self.suffix, self.result)
 
 class Raise:
     def __init__(self, raise_count=0, rolls=[]):
@@ -235,7 +235,7 @@ class SevenSea2EdRaiseRoller:
         if not self.reroll_one_dice:
             discarded_dice = None
         else:
-            reroll = self.roll(1)
+            reroll = self.roll(1, 'r')
             min_value_dice = min(rolls, key=lambda x: x.value)
             if min_value_dice.value < sum(x.value for x in reroll):
                 rolls.remove(min_value_dice)
@@ -253,10 +253,10 @@ class SevenSea2EdRaiseRoller:
 
         return RaiseRollResult(raises, sorted(unused, key=lambda x: x.value, reverse=True), discarded_dice)
 
-    def roll(self, dice_count, explode_level=0):
+    def roll(self, dice_count, suffix=''):
         if dice_count == 0:
             return []
 
-        rolls = [RollResult(x, self.lash_count, self.joie_de_vivre_target, explode_level) for x in self.roller(dice_count)]
+        rolls = [RollResult(x, self.lash_count, self.joie_de_vivre_target, suffix) for x in self.roller(dice_count)]
 
-        return rolls + self.roll(len([x for x in rolls if x.result == 10]), explode_level + 1) if self.explode else rolls
+        return rolls + self.roll(len([x for x in rolls if x.result == 10]), suffix + 'x') if self.explode else rolls
