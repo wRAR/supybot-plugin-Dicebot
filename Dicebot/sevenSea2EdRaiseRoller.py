@@ -128,23 +128,26 @@ class RaiseAggregator:
         return r + '}'
 
     def get_lower_dice(self, target):
-        print('target: %d, pool: %s' % (target, self.tostr()))
         return self.get_dice(range(target, 0, -1))
 
     def get_higher_dice(self, target):
-        print('target: %d, pool: %s' % (target, self.tostr()))
         return self.get_dice(range(target + 1, self.max_roll + 1))
 
-    def get_raise_candidate(self, first_dice, dice_provider):
+    def get_raise_candidate(self, first_dice, down):
         raise_candidate = [first_dice]
         while True:
             raise_sum = sum(x.value for x in raise_candidate)
             if raise_sum >= self.raise_target:
                 return Raise(self.raises_per_target, raise_candidate)
 
-            next_dice = dice_provider(self.raise_target - raise_sum)
+            target = self.raise_target - raise_sum
+            next_dice = self.get_lower_dice(target) if down else self.get_higher_dice(target)
             if next_dice is not None:
                 raise_candidate.append(next_dice)
+            elif self.dice_count > 0 and down:
+                # we are going down. Let's grab one dice above and continue
+                raise_candidate.append(self.get_higher_dice(0))
+                continue
             elif self.ten_is_still_raise and raise_sum >= 10:
                 return Raise(1, raise_candidate)
             else:
@@ -172,18 +175,16 @@ class RaiseAggregator:
         if self.exhausted:
             raise StopIteration
 
-        print('next')
         first_dice = self.get_lower_dice(self.max_roll)
         if first_dice is None:
             self.exhausted = True
             raise StopIteration
 
-        print('first dice is %s' % str(first_dice))
-        lower = self.get_raise_candidate(first_dice, self.get_lower_dice)
+        lower = self.get_raise_candidate(first_dice, True)
         if lower.Sum == self.raise_target:
             return lower
 
-        higher = self.get_raise_candidate(first_dice, self.get_higher_dice)
+        higher = self.get_raise_candidate(first_dice, False)
         if higher.raise_count == 0 and lower.raise_count == 0:
             self.exhausted = True
             self.return_raise_to_pool(first_dice, higher)
@@ -191,12 +192,20 @@ class RaiseAggregator:
             self.return_dice_to_pool(first_dice)
             raise StopIteration
 
-        if higher.raise_count == lower.raise_count and higher.Sum >= lower.Sum:
+        if higher.raise_count == lower.raise_count:
+            if higher.Sum >= lower.Sum:
+                self.return_raise_to_pool(first_dice, higher)
+                return lower
+            else:
+                self.return_raise_to_pool(first_dice, lower)
+                return higher
+        elif higher.raise_count > lower.raise_count:
+            self.return_raise_to_pool(first_dice, lower)
+            return higher
+        else:
             self.return_raise_to_pool(first_dice, higher)
             return lower
 
-        self.return_raise_to_pool(first_dice, lower)
-        return higher
 
 class SevenSea2EdRaiseRoller:
     """

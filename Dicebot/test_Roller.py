@@ -105,7 +105,7 @@ class TestRoller:
             RerollRoller([10, 5, 10, 5, 6, 4, 3, 4, 3], [2]).roll,
             skill_rank=5
         ).roll_and_count(7)
-        assert str(rolls) == "6 raises: **(10 + 5), **(10 + 5), **(6 + 4 + 4x + 3), unused: 3x, discarded: 2"
+        assert str(rolls) == "6 raises: **(10 + 5), **(10 + 5), **(6 + 4x + 4 + 3x), unused: 3, discarded: 2"
 
 class Roller:
     def roll(self, count):
