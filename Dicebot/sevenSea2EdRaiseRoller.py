@@ -54,6 +54,10 @@ class Raise:
         self.rolls = list(map(lambda x: x if isinstance(x, RollResult) else RollResult(x), rolls))
         self.raise_count = raise_count
 
+    @property
+    def Sum(self):
+        return sum(x.value for x in self.rolls)
+
     def __str__(self):
         if self.raise_count == 0:
             return "(%s)" % (" + ".join(map(str, self.rolls)))
@@ -96,26 +100,60 @@ class RaiseAggregator:
         self.exhausted = False
 
         self.rolled_dices = defaultdict(list)
+        self.rolled_dice_count = 0
         self.dices = defaultdict(list)
+        self.dice_count = 0
         self.max_roll = 0
         for x in rolls:
             self.rolled_dices[x.value].append(x)
+            self.rolled_dice_count += 1
             if x.value > self.max_roll:
                 self.max_roll = x.value
 
-    def get_dice(self, max):
-        for x in range(max, 0, -1):
+    def get_dice(self, numbers_to_check):
+        for x in numbers_to_check:
             if len(self.dices[x]) > 0:
-                return self.dices[x].pop()
-
-        for x in range(max + 1, self.max_roll+ 1):
-            if len(self.dices[x]) > 0:
+                self.dice_count -= 1
                 return self.dices[x].pop()
 
         return None
 
+    def get_lower_dice(self, target):
+        return self.get_dice(range(target, 0, -1))
+
+    def get_higher_dice(self, target):
+        return self.get_dice(range(target, self.max_roll + 1))
+
+    def get_raise_candidate(self, first_dice, dice_provider):
+        if self.dice_count == 0:
+            return Raise()
+
+        raise_candidate = [first_dice]
+        while True:
+            raise_sum = sum(x.value for x in raise_candidate)
+            if raise_sum >= self.raise_target:
+                return Raise(self.raises_per_target, raise_candidate)
+
+            next_dice = dice_provider(self.raise_target - raise_sum)
+            if next_dice is not None:
+                raise_candidate.append(next_dice)
+            elif self.ten_is_still_raise and raise_sum >= 10:
+                return Raise(1, raise_candidate)
+            else:
+                return Raise(0, raise_candidate)
+
+    def return_dice_to_pool(self, dice):
+        self.dice_count += 1
+        self.dices[dice.value].append(dice)
+
+    def return_raise_to_pool(self, first_dice, raise_candidate):
+        for x in raise_candidate.rolls:
+            if x != first_dice:
+                self.return_dice_to_pool(x)
+
     def __iter__(self):
         self.dices = defaultdict(list)
+        self.dice_count = self.rolled_dice_count
         for value in self.rolled_dices:
             for roll in self.rolled_dices[value]:
                 self.dices[value].append(roll)
@@ -126,26 +164,29 @@ class RaiseAggregator:
         if self.exhausted:
             raise StopIteration
 
-        raise_candidate = []
-        raise_count = self.raises_per_target
-        while True:
-            raise_sum = sum(x.value for x in raise_candidate)
-            next_dice = self.get_dice(self.raise_target - raise_sum)
-            if next_dice is not None:
-                raise_candidate.append(next_dice)
-                if raise_sum + next_dice.value >= self.raise_target:
-                    break
-            else:
-                if self.ten_is_still_raise and raise_sum >= 10:
-                    raise_count = 1
-                    break
+        first_dice = self.get_lower_dice(self.max_roll)
+        if first_dice is None:
+            self.exhausted = True
+            raise StopIteration
 
-                self.exhausted = True
-                for x in raise_candidate:
-                    self.dices[x.value].append(x)
-                raise StopIteration
+        lower = self.get_raise_candidate(first_dice, self.get_lower_dice)
+        if lower.Sum == self.raise_target:
+            return lower
 
-        return Raise(raise_count, raise_candidate)
+        higher = self.get_raise_candidate(first_dice, self.get_higher_dice)
+        if higher.raise_count == 0 and lower.raise_count == 0:
+            self.exhausted = True
+            self.return_raise_to_pool(first_dice, higher)
+            self.return_raise_to_pool(first_dice, lower)
+            self.return_dice_to_pool(first_dice)
+            raise StopIteration
+
+        if higher.raise_count == lower.raise_count and higher.Sum >= lower.Sum:
+            self.return_raise_to_pool(first_dice, higher)
+            return lower
+
+        self.return_raise_to_pool(first_dice, lower)
+        return higher
 
 class SevenSea2EdRaiseRoller:
     """
