@@ -100,6 +100,13 @@ class TestRoller:
         ).roll_and_count(7)
         assert str(rolls) == "10 raises: **(10 + 5), **(10 + 5), **(10 + 5), **(10 + 6x), **(7x + 4x + 4x), discarded: 1"
 
+    def test_optimal_solution_is_one_step_up2(self):
+        rolls = SevenSea2EdRaiseRoller(
+            RerollRoller([10, 5, 10, 5, 6, 4, 3, 4, 3], [2]).roll,
+            skill_rank=5
+        ).roll_and_count(7)
+        assert str(rolls) == "6 raises: **(10 + 5), **(10 + 5), **(6 + 4 + 4x + 3), unused: 3x, discarded: 2"
+
 class Roller:
     def roll(self, count):
         return [next(self) for _ in range(count)]

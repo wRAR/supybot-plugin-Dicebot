@@ -118,16 +118,24 @@ class RaiseAggregator:
 
         return None
 
+    def tostr(self):
+        r = '{'
+        for x in self.dices:
+            r += '%d: [' % x
+            for y in self.dices[x]:
+                r += '%s, ' % str(y)
+            r += '], '
+        return r + '}'
+
     def get_lower_dice(self, target):
+        print('target: %d, pool: %s' % (target, self.tostr()))
         return self.get_dice(range(target, 0, -1))
 
     def get_higher_dice(self, target):
-        return self.get_dice(range(target, self.max_roll + 1))
+        print('target: %d, pool: %s' % (target, self.tostr()))
+        return self.get_dice(range(target + 1, self.max_roll + 1))
 
     def get_raise_candidate(self, first_dice, dice_provider):
-        if self.dice_count == 0:
-            return Raise()
-
         raise_candidate = [first_dice]
         while True:
             raise_sum = sum(x.value for x in raise_candidate)
@@ -164,11 +172,13 @@ class RaiseAggregator:
         if self.exhausted:
             raise StopIteration
 
+        print('next')
         first_dice = self.get_lower_dice(self.max_roll)
         if first_dice is None:
             self.exhausted = True
             raise StopIteration
 
+        print('first dice is %s' % str(first_dice))
         lower = self.get_raise_candidate(first_dice, self.get_lower_dice)
         if lower.Sum == self.raise_target:
             return lower
