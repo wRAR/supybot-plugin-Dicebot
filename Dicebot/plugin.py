@@ -307,7 +307,7 @@ class Dicebot(callbacks.Plugin):
             joie_de_vivre=vivre,
             raise_target=15 if cursed else 10)
 
-        return str(roller.roll_and_count(roll_count))
+        return '[%s]: %s' % (m.group(0), str(roller.roll_and_count(roll_count)))
 
 
     def _parse7SeaRoll(self, m):
