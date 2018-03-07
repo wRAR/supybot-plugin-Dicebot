@@ -93,7 +93,7 @@ class RaiseRollResult:
         return result
 
 class RaiseAggregator:
-    def __init__(self, raise_target, raises_per_target, lash_count, joie_de_vivre_target, rolls):
+    def __init__(self, raise_target, raises_per_target, rolls):
         self.raise_target = raise_target
         self.raises_per_target = raises_per_target
         self.ten_is_still_raise = self.raise_target == 10 or self.raises_per_target != 1
@@ -222,8 +222,6 @@ class SevenSea2EdRaiseRoller:
         self.aggregator_template = lambda x: RaiseAggregator(
             15 if skill_rank >= 4 and default_roll else raise_target,
             2 if skill_rank >= 4 and default_roll else raises_per_target,
-            lash_count,
-            skill_rank if joie_de_vivre else 0,
             x
         )
 
