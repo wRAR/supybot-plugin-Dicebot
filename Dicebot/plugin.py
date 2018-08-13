@@ -429,10 +429,14 @@ class Dicebot(callbacks.Plugin):
 
     @staticmethod
     def _processWGResults(results, pool):
-        icons = 2 * results.count(6) + results.count(5) + results.count(4)
+        n6 = results.count(6)
+        n5 = results.count(5)
+        n4 = results.count(4)
+        icons = 2 * n6 + n5 + n4
+        iconssymb = n6 * "⚅" + n5 * "⚄" + n4 * "⚃"
         isNonZero = icons > 0
         if isNonZero:
-            iconsStr = format('%n', (icons, 'icon'))
+            iconsStr = str(icons)+": "+iconssymb #format('%n', (icons, 'icon'))
             return '(pool %d) %s' % (pool, iconsStr)
 
     def _autoRollEnabled(self, irc, channel):
