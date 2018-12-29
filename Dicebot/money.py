@@ -63,6 +63,8 @@ class MoneyConverter:
             "₴": "UAH",
 
             "Б.Р.": "BYN",
+            "БЕЛ": "BYN",
+
             "$": "USD",
             "€": "EUR",
             "£": "GBP",
