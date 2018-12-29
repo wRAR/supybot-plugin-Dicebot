@@ -472,6 +472,7 @@ class Dicebot(callbacks.Plugin):
                 (not irc.isChannel(channel) and
                 self.registryValue('autoRollInPrivate')))
 
+    @wrap(['somethingWithoutSpaces'])
     def roll(self, irc, msg, args, text):
         """<dice>d<sides>[<modifier>]
 
@@ -483,8 +484,8 @@ class Dicebot(callbacks.Plugin):
         if self._autoRollEnabled(irc, msg.args[0]):
             return
         self._process(irc, text)
-    roll = wrap(roll, ['somethingWithoutSpaces'])
 
+    @wrap
     def shuffle(self, irc, msg, args):
         """takes no arguments
 
@@ -492,8 +493,8 @@ class Dicebot(callbacks.Plugin):
         """
         self.deck.shuffle()
         irc.reply('shuffled')
-    shuffle = wrap(shuffle)
 
+    @wrap([additional('positiveInt', 1)])
     def draw(self, irc, msg, args, count):
         """[<count>]
 
@@ -501,7 +502,6 @@ class Dicebot(callbacks.Plugin):
         """
         cards = [next(self.deck) for i in range(count)]
         irc.reply(', '.join(cards))
-    draw = wrap(draw, [additional('positiveInt', 1)])
     deal = draw
 
     def doPrivmsg(self, irc, msg):
