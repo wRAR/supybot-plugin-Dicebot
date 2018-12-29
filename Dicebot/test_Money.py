@@ -45,32 +45,32 @@ class TestMoney:
         assert m.format_money(500, "USD") == "$500"
         assert m.format_money(400, "₽") == "400₽"
         assert m.format_money(400, "руб") == "400₽"
-        assert m.format_money(200.3, "грн") == "200.30 грн"
+        assert m.format_money(200.3, "грн") == "₴200.30"
 
     def test_single_currency_straight_reverse(self):
         r = DummyRequester({"UAH_USD":0.04})
         m = MoneyConverter(r)
-        assert m.convert(1, "uah", ["usd"]) == "1 uah: $0.04"
+        assert m.convert(1, "uah", ["usd"]) == "₴1: $0.04"
         assert r.query_count == 1
         assert r.last_query == "UAH_USD"
 
-        assert m.convert(1, "usd", ["грн"]) == "$1: 25 грн"
+        assert m.convert(1, "usd", ["грн"]) == "$1: ₴25"
         assert r.query_count == 1
 
     def test_several_currencies(self):
         r = DummyRequester({"UAH_USD":0.04,"UAH_EUR":0.03,"UAH_RUB":2.5})
         m = MoneyConverter(r)
-        assert m.convert(1, "uah", ["usd", "eur", "rub"]) == "1 uah: $0.04, €0.03, 2.50₽"
+        assert m.convert(1, "uah", ["usd", "eur", "rub"]) == "₴1: $0.04, €0.03, 2.50₽"
         assert r.query_count == 3
 
     def test_non_trivial_amount(self):
         r = DummyRequester({"UAH_USD":0.04})
         m = MoneyConverter(r)
-        assert m.convert(15, "uah", ["usd"]) == "15 uah: $0.60"
+        assert m.convert(15, "uah", ["usd"]) == "₴15: $0.60"
         assert r.query_count == 1
         assert r.last_query == "UAH_USD"
 
-        assert m.convert(25, "usd", ["грн"]) == "$25: 625 грн"
+        assert m.convert(25, "usd", ["грн"]) == "$25: ₴625"
         assert r.query_count == 1
 
     def test_no_op(self):
@@ -89,16 +89,16 @@ class TestMoney:
     def test_cache_expiration(self):
         r = DummyRequester({"UAH_USD":0.04})
         m = MoneyConverter(r)
-        assert m.convert(15, "uah", ["usd"]) == "15 uah: $0.60"
+        assert m.convert(15, "uah", ["usd"]) == "₴15: $0.60"
         assert r.query_count == 1
         assert r.last_query == "UAH_USD"
 
-        assert m.convert(25, "uah", ["usd"]) == "25 uah: $1"
+        assert m.convert(25, "uah", ["usd"]) == "₴25: $1"
         assert r.query_count == 1
 
         m.cache["UAH_USD"].created_at = date(1980, 1, 1)
 
-        assert m.convert(1, "uah", ["usd"]) == "1 uah: $0.04"
+        assert m.convert(1, "uah", ["usd"]) == "₴1: $0.04"
         assert r.query_count == 2
 
 class DummyRequester:

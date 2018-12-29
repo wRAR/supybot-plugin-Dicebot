@@ -69,7 +69,8 @@ class MoneyConverter:
             "USD": "${0}",
             "RUB": "{0}₽",
             "EUR": "€{0}",
-            "GBP": "£{0}"
+            "GBP": "£{0}",
+            "UAH": "₴{0}"
         }
 
     def get_rate_from_origin(self, input_currency, output_currency):
