@@ -1,3 +1,4 @@
 limnoria
 pylint
 pytest
+requests

@@ -29,6 +29,7 @@
 
 from .deck import Deck
 from .sevenSea2EdRaiseRoller import SevenSea2EdRaiseRoller
+from .money import MoneyConverter, HttpRequester
 
 from operator import itemgetter
 import re
@@ -55,6 +56,7 @@ class Dicebot(callbacks.Plugin):
     rollReWoD         = re.compile(r'(?P<rolls>\d+)w(?P<explode>\d|-)?$')
     rollReDH          = re.compile(r'(?P<rolls>\d*)vs\((?P<thr>([-+]|\d)+)\)$')
     rollReWG          = re.compile(r'(?P<rolls>\d+)#wg$')
+    convertMoney      = re.compile(r'^!m (?P<amount>\d+) (?P<input>\S+)(?P<output>( \S+)*)$')
 
     validationDH      = re.compile(r'^[+\-]?\d{1,4}([+\-]\d{1,4})*$')
     validation7sea2ed = re.compile(r'^[+\-]?\d{1,2}([+\-]\d{1,2})*$')
@@ -67,6 +69,7 @@ class Dicebot(callbacks.Plugin):
     def __init__(self, irc):
         super(Dicebot, self).__init__(irc)
         self.deck = Deck()
+        self.money = MoneyConverter(HttpRequester())
 
     def _roll(self, dice, sides, mod=0):
         """
@@ -110,12 +113,17 @@ class Dicebot(callbacks.Plugin):
 
     def _process(self, irc, text):
         """
-        Process a message and reply with roll results, if any.
+        Process a message and reply with roll results, if any. But tries to process money conversion first.
 
         The message is split to the words and each word is checked against all
         known expression forms (first applicable form is used). All results
         are printed together in the IRC reply.
         """
+        m = self.convertMoney.match(text)
+        if m:
+            irc.reply(self._convertMoney(m))
+            return
+
         checklist = [
                 (self.rollReStandard, self._parseStandardRoll),
                 (self.rollReSR, self._parseShadowrunRoll),
@@ -504,6 +512,19 @@ class Dicebot(callbacks.Plugin):
         else:
             text = msg.args[1]
         self._process(irc, text)
+
+    def _convertMoney(self, m):
+        """
+        Converts money using some online service. Syntax is:
+        !m <amount> <from> (<to>)*
+        if <to> is omitted, then it is assumed to be [usd, eur].
+        """
+        amount = 0 if m.group('amount') is None else int(m.group('amount'))
+        input = m.group('input')
+        if amount == 0 or input is None:
+            return
+        output = ['usd', 'eur'] if m.group('output') is None else m.group('output').strip().split()
+        return self.money.convert(amount, input, output)
 
 Class = Dicebot
 
