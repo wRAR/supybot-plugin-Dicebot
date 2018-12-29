@@ -55,13 +55,17 @@ class MoneyConverter:
         self.requester = requester
         self.cache = {}
         self.synonims = {
-            "$": "USD",
-            "ГРН": "UAH",
+            "₽": "RUB",
             "РУБ": "RUB",
-            "БЕЛ": "BYN",
+            "Р.": "RUB",
+
+            "ГРН": "UAH",
+            "₴": "UAH",
+
+            "Б.Р.": "BYN",
+            "$": "USD",
             "€": "EUR",
             "£": "GBP",
-            "₽": "RUB",
             "¥": "JPY",
             "元": "CNY"
         }
