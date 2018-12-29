@@ -510,7 +510,7 @@ class Dicebot(callbacks.Plugin):
         if input is None or len(input) == 0:
             return
         outputs = ['usd', 'eur'] if outputs is None or len(outputs) == 0 else filter(lambda x: x is not None and len(x) > 0, outputs)
-        return self.money.convert(amount, input, outputs)
+        irc.reply(self.money.convert(amount, input, outputs))
     m = money
 
     def doPrivmsg(self, irc, msg):
