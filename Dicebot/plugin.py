@@ -29,12 +29,13 @@
 
 from .deck import Deck
 from .sevenSea2EdRaiseRoller import SevenSea2EdRaiseRoller
+from .money import MoneyConverter, HttpRequester
 
 from operator import itemgetter
 import re
 import random
 
-from supybot.commands import additional, wrap
+from supybot.commands import additional, wrap, any
 from supybot.utils.str import format, ordinal
 import supybot.ircmsgs as ircmsgs
 import supybot.callbacks as callbacks
@@ -67,6 +68,7 @@ class Dicebot(callbacks.Plugin):
     def __init__(self, irc):
         super(Dicebot, self).__init__(irc)
         self.deck = Deck()
+        self.money = MoneyConverter(HttpRequester())
 
     def _roll(self, dice, sides, mod=0):
         """
@@ -464,6 +466,7 @@ class Dicebot(callbacks.Plugin):
                 (not irc.isChannel(channel) and
                 self.registryValue('autoRollInPrivate')))
 
+    @wrap(['somethingWithoutSpaces'])
     def roll(self, irc, msg, args, text):
         """<dice>d<sides>[<modifier>]
 
@@ -475,8 +478,8 @@ class Dicebot(callbacks.Plugin):
         if self._autoRollEnabled(irc, msg.args[0]):
             return
         self._process(irc, text)
-    roll = wrap(roll, ['somethingWithoutSpaces'])
 
+    @wrap
     def shuffle(self, irc, msg, args):
         """takes no arguments
 
@@ -484,8 +487,8 @@ class Dicebot(callbacks.Plugin):
         """
         self.deck.shuffle()
         irc.reply('shuffled')
-    shuffle = wrap(shuffle)
 
+    @wrap([additional('positiveInt', 1)])
     def draw(self, irc, msg, args, count):
         """[<count>]
 
@@ -493,8 +496,22 @@ class Dicebot(callbacks.Plugin):
         """
         cards = [next(self.deck) for i in range(count)]
         irc.reply(', '.join(cards))
-    draw = wrap(draw, [additional('positiveInt', 1)])
     deal = draw
+
+    @wrap([additional('float'), additional('somethingWithoutSpaces'), any('somethingWithoutSpaces')])
+    def money(self, irc, msg, args, amount, input, outputs):
+        """
+        Converts money using some online service. Syntax is:
+        !m <amount> <from> (<to>)*
+        if <to> is omitted, then it is assumed to be ['usd', 'eur'].
+        """
+        if amount == 0 or amount is None:
+            return
+        if input is None or len(input) == 0:
+            return
+        outputs = ['usd', 'eur'] if outputs is None or len(outputs) == 0 else filter(lambda x: x is not None and len(x) > 0, outputs)
+        irc.reply(self.money.convert(amount, input, outputs))
+    m = money
 
     def doPrivmsg(self, irc, msg):
         if not self._autoRollEnabled(irc, msg.args[0]):
