@@ -35,7 +35,7 @@ from operator import itemgetter
 import re
 import random
 
-from supybot.commands import additional, wrap, any
+from supybot.commands import additional, wrap, rest
 from supybot.utils.str import format, ordinal
 import supybot.ircmsgs as ircmsgs
 import supybot.callbacks as callbacks
@@ -59,6 +59,8 @@ class Dicebot(callbacks.Plugin):
 
     validationDH      = re.compile(r'^[+\-]?\d{1,4}([+\-]\d{1,4})*$')
     validation7sea2ed = re.compile(r'^[+\-]?\d{1,2}([+\-]\d{1,2})*$')
+
+    convertMoney      = re.compile(r'((?P<prefix>(?P<p_curr>[$€£₴₽¥元])(?P<p_amount>(\d+[\.,]\d+)|([\.,]\d+)|(\d+)))|(?P<suffix>(?P<s_amount>(\d+[\.,]\d+)|([\.,]\d+)|(\d+))( ?(?P<s_curr>[^\d\s]+))))(?P<output>( [^\d\s]+)*)')
 
     MAX_DICE = 1000
     MIN_SIDES = 2
@@ -498,18 +500,33 @@ class Dicebot(callbacks.Plugin):
         irc.reply(', '.join(cards))
     deal = draw
 
-    @wrap([additional('float'), additional('somethingWithoutSpaces'), any('somethingWithoutSpaces')])
-    def money(self, irc, msg, args, amount, input, outputs):
+    @wrap([rest('anything')])
+    def money(self, irc, msg, args, user_input):
         """
         Converts money using some online service. Syntax is:
-        !m <amount> <from> (<to>)*
+        !m <amount> (<to>)*
+        amount is either $200, 200$, 200 $ or 200 USD
         if <to> is omitted, then it is assumed to be ['usd', 'eur'].
         """
-        if amount == 0 or amount is None:
+        self.log.debug(user_input)
+        if user_input is None:
+            self.log.debug('user_input is None')
             return
-        if input is None or len(input) == 0:
+
+        user_input = self.convertMoney.match(user_input)
+
+        if user_input.group('prefix') is not None:
+            input = user_input.group('p_curr')
+            amount = float(user_input.group('p_amount'))
+        elif user_input.group('suffix') is not None:
+            input = user_input.group('s_curr')
+            amount = float(user_input.group('s_amount'))
+        else:
+            self.log.debug('user_input does not have prefix and suffix.')
             return
-        outputs = ['usd', 'eur'] if outputs is None or len(outputs) == 0 else filter(lambda x: x is not None and len(x) > 0, outputs)
+
+        outputs = ('' if user_input.group('output') is None else user_input.group('output')).split()
+        outputs = ['usd', 'eur'] if len(outputs) == 0 else [x for x in outputs if x is not None and len(x) > 0]
         irc.reply(self.money.convert(amount, input, outputs))
     m = money
 

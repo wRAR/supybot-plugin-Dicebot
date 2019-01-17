@@ -124,7 +124,8 @@ class MoneyConverter:
         return output_format.format(int(amount) if isinstance(amount, int) or amount.is_integer() else "{0:.2f}".format(amount))
 
     def convert(self, amount, input, output):
-        rates = self.get_rates(input, output)
+        normalized_input = self.normalize(input)
+        rates = self.get_rates(input, [x for x in output if self.normalize(x) != normalized_input] if len(output) > 1 else output)
         return "{0}: {1}".format(
             self.format_money(amount, input),
             ', '.join(self.format_money(val * amount, key) for (key, val) in rates.items()))
